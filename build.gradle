@@ -97,19 +97,19 @@ if( project.hasProperty('ossrhUsername') ) {
                     name 'Auto64Fto32F'
                     packaging 'pom'
                     // optionally artifactId can be defined here
-                    description 'BoofCV is an open source Java library for real-time computer vision and robotics applications.'
+                    description 'A minimalist library for converting double (64-bit) numerical Java code into float (32-bit)'
                     url 'http://boofcv.org'
 
                     scm {
-                        connection 'scm:git:git://github.com/lessthanoptimal/BoofCV.git'
-                        developerConnection 'scm:git:git://github.com/lessthanoptimal/BoofCV.git'
-                        url 'https://github.com/lessthanoptimal/BoofCV'
+                        connection 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                        developerConnection 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                        url 'https://github.com/lessthanoptimal/Auto64Fto32F'
                     }
 
                     licenses {
                         license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name 'Public Domain'
+                            url 'http://unlicense.org/'
                         }
                     }
 
