@@ -1,0 +1,70 @@
+package com.peterabeles.auto64fto32f;
+
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * Traverses through a directory tree recursively converting code from double into floats.
+ *
+ * @author Peter Abeles
+ */
+public class RecursiveConvert {
+
+	private ConvertFile32From64 converter;
+
+	private String suffice64 = "_F64";
+	private String suffice32 = "_F32";
+
+
+	public RecursiveConvert(ConvertFile32From64 converter ) {
+		this.converter = converter;
+	}
+
+	public void setSuffice( String suffice64 , String suffice32 ) {
+		this.suffice32 = suffice32;
+		this.suffice64 = suffice64;
+	}
+
+	public void process( File inputDirectory ) {
+		process(inputDirectory,inputDirectory);
+	}
+
+	public void process( File inputDirectory , File outputDirectory ) {
+		if( !inputDirectory.isDirectory() ) {
+			throw new IllegalArgumentException( "Input isn't a directory" );
+		}
+		if( !outputDirectory.exists() ) {
+			if( !outputDirectory.mkdirs() ) {
+				throw new RuntimeException("Can't create output directory");
+			}
+		} if( !outputDirectory.isDirectory() ) {
+			throw new IllegalArgumentException( "Output isn't a directory" );
+		}
+
+		System.out.println( "---- Directory " + inputDirectory );
+
+		// examine all the files in the directory first
+		File[] files = inputDirectory.listFiles();
+		if( files == null )
+			return;
+
+		for( File f : files ) {
+			String n = f.getName();
+			if( n.endsWith( suffice64+".java" ) ) {
+				n = n.substring(0, n.length() - 9) + suffice32+".java";
+				try {
+					System.out.println( "Examining " + n );
+					converter.process(f,new File(outputDirectory,n));
+				} catch( IOException e ) {
+					throw new RuntimeException( e );
+				}
+			}
+		}
+
+		for( File f : files ) {
+			if( f.isDirectory() && !f.isHidden() ) {
+				process( f , new File(outputDirectory,f.getName()));
+			}
+		}
+	}
+}

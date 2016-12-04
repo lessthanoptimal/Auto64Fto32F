@@ -1,0 +1,146 @@
+ext.libpath = file('./').absolutePath
+
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'osgi'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = 'com.peterabeles'
+version = '1.0-SNAPSHOT'
+
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+test {
+    ignoreFailures true
+    reports.html.enabled = false
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+javadoc {
+    configure(options) {
+        failOnError = false
+    }
+}
+
+jar {
+    manifest { // the manifest of the default jar is of type OsgiManifest
+        instruction 'Bundle-Vendor', 'Peter Abeles'
+        instruction 'Bundle-DocURL', 'http://peterabeles.com'
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+
+    test {
+        java {
+            srcDir 'test'
+            srcDir 'examples'
+        }
+    }
+}
+
+// if Maven central isn't setup in gradle.properties skip all of this
+if( project.hasProperty('ossrhUsername') ) {
+    signing {
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name 'Auto64Fto32F'
+                    packaging 'pom'
+                    // optionally artifactId can be defined here
+                    description 'BoofCV is an open source Java library for real-time computer vision and robotics applications.'
+                    url 'http://boofcv.org'
+
+                    scm {
+                        connection 'scm:git:git://github.com/lessthanoptimal/BoofCV.git'
+                        developerConnection 'scm:git:git://github.com/lessthanoptimal/BoofCV.git'
+                        url 'https://github.com/lessthanoptimal/BoofCV'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'pabeles'
+                            name 'Peter Abeles'
+                            email 'peter.abeles@gmail.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+task testReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/allTests")
+    reportOn subprojects*.test
+}
+
+idea {
+    project {
+        jdkName = '1.7 (64bit)'
+        languageLevel = '1.7'
+    }
+
+    module {
+        excludeDirs += file('.idea')
+    }
+}
+
+
