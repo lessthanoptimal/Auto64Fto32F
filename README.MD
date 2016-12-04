@@ -21,7 +21,7 @@ Converted Code:
 float foo = 1.6f*bar + (float)Math.exp(6) + (float)moo;
 ```
 
-The sequence ```/**/```double is searched for an ignored, thus it will remain a double in the floating point code.  ```/**/```Math will not be type casted because there is no space infront of Math.  More on that Math issue later.  
+The sequence ```/**/double``` is searched for an ignored, thus it will remain a double in the floating point code.  ```/**/Math``` will not be typecasted because there is no space in front of Math.  More on that Math issue later.  
 
 To avoid a compile time exception in the float code the variable 'moo' needs to be converted into a float. That is accomplished through a gratuitous (double) typecast.
 
