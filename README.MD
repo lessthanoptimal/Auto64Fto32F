@@ -10,7 +10,7 @@ The suffice it searches for can be change from '_F64' into other valid string.
 
 ## Transformation Process
 
-The process of converting double math into float math is fairly simple not very 'intelligent'.
+The process of converting double math into float math is fairly simple.  It does not attempt to parse the code and does not know if it's examining text inside of comments or not.
 
 1. Copies over the copyright at the start of the file unmodified.
 
@@ -20,7 +20,7 @@ The process of converting double math into float math is fairly simple not very 
 
    White space is written to the output unmodified
    
-3. Words are transformed by applying three separate sets of text replacements in order.
+3. Words are transformed by applying four separate sets of filters in the following order.
   * REGEX matching:  If part of the word matches a regex that portion of the word is replaced with replacement text
   * Starts with matching:  If the word begins with the specified text it is replaced with the replacement text.
   * double replacement: An internally specified regex is used to detect doubles (e.g. 45.0 or 4.) and convert it into a float

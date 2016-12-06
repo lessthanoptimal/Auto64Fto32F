@@ -26,8 +26,6 @@ import java.util.List;
 /**
  * Converts a file written for 64bit numbers into 32bit numbers by replacing keywords.
  *
- *
- *
  * @author Peter Abeles
  */
 public class ConvertFile32From64 {
@@ -115,14 +113,33 @@ public class ConvertFile32From64 {
         }
     }
 
+    /**
+     * Adds a text replacement rule.  These will be run in the first pass
+     *
+     * @param pattern REGEX pattern that is searched for inside the word
+     * @param replacement The string that the matching portion will be replaced with
+     */
     public void replacePattern(String pattern, String replacement) {
         replacements.add(new Replacement(pattern, replacement));
     }
 
+    /**
+     * If a world starts with the pattern (just a string not a REGEX) then the matching text will be replaced
+     * by the replacement string.
+     *
+     * @param pattern Regular text string
+     * @param replacement The string that the matching portion will be replaced with
+     */
     public void replaceStartsWith(String pattern, String replacement) {
         replaceStartsWith.add(new Replacement(pattern, replacement));
     }
 
+    /**
+     * Adds a text replacement rule.  These will be run in the final pass
+     *
+     * @param pattern REGEX pattern that is searched for inside the word
+     * @param replacement The string that the matching portion will be replaced with
+     */
     public void replacePatternAfter(String pattern, String replacement) {
         replacementsAfter.add(new Replacement(pattern, replacement));
     }
