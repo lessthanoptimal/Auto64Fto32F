@@ -21,8 +21,8 @@ public class RecursiveConvert {
 	}
 
 	public void setSuffice( String suffice64 , String suffice32 ) {
-		this.suffice32 = suffice32;
 		this.suffice64 = suffice64;
+		this.suffice32 = suffice32;
 	}
 
 	public void process( File inputDirectory ) {
@@ -53,7 +53,7 @@ public class RecursiveConvert {
 			if( n.endsWith( suffice64+".java" ) ) {
 				n = n.substring(0, n.length() - 9) + suffice32+".java";
 				try {
-					System.out.println( "Examining " + n );
+					System.out.println( "Generating " + n );
 					converter.process(f,new File(outputDirectory,n));
 				} catch( IOException e ) {
 					throw new RuntimeException( e );
