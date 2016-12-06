@@ -35,15 +35,11 @@ public class Example64to32App extends RecursiveConvert {
 
     public static void main(String args[] ) {
         String directories[] = new String[]{
-                "main/geo/src/boofcv/alg/distort",
-                "main/ip/src/boofcv/struct/distort"};
+                "examples"};
 
         ConvertFile32From64 converter = new ConvertFile32From64(true);
 
-        converter.replacePattern("DOUBLE_TEST_TOL", "FLOAT_TEST_TOL");
-        converter.replacePattern("DCONV_TOL_", "FCONV_TOL_");
-        converter.replacePattern("GrlConstants.PI", "GrlConstants.F_PI");
-        converter.replacePattern("GrlConstants.EPS", "GrlConstants.F_EPS");
+        converter.replacePattern("MyConstants.EPS", "MyConstants.F_EPS");
 
         Example64to32App app = new Example64to32App(converter);
         for( String dir : directories ) {

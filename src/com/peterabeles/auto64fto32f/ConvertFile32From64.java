@@ -26,6 +26,8 @@ import java.util.List;
 /**
  * Converts a file written for 64bit numbers into 32bit numbers by replacing keywords.
  *
+ *
+ *
  * @author Peter Abeles
  */
 public class ConvertFile32From64 {
@@ -37,6 +39,10 @@ public class ConvertFile32From64 {
     List<Replacement> replaceStartsWith = new ArrayList<>();
     List<Replacement> replacementsAfter = new ArrayList<>();
 
+    /**
+     * Constructor
+     * @param addDefaultReplacements If true all of the defaults replacement patterns are applied.
+     */
     public ConvertFile32From64( boolean addDefaultReplacements ) {
         if( addDefaultReplacements ) {
             replacePattern("/\\*\\*/double", "FIXED_DOUBLE");
@@ -51,6 +57,12 @@ public class ConvertFile32From64 {
         }
     }
 
+    /**
+     * Applies the specified keyword replacements to the input file and saves the results to the output file
+     * @param inputFile File that is to be transformed. Unmodified.
+     * @param outputFile Where results of the transformation are written to.  Modified
+     * @throws IOException If something goes wrong this is thrown.
+     */
     public void process(File inputFile, File outputFile ) throws IOException {
         in = new FileInputStream(inputFile);
         out = new PrintStream(outputFile);
@@ -126,18 +138,12 @@ public class ConvertFile32From64 {
             s = replaceStartString(s, r.pattern, r.replacement);
         }
 
-        s = replaceStartString(s, "Math.", "(float)Math.");
-        s = replaceStartString(s, "-Math.", "(float)-Math.");
-        s = replaceStartString(s, "rand.nextGaussian", "(float)rand.nextGaussian");
         s = handleFloats(s);
 
         for (int i = 0; i < replacementsAfter.size(); i++) {
             Replacement r = replacementsAfter.get(i);
             s = s.replaceAll(r.pattern, r.replacement);
         }
-
-        // put the doubles back in
-        s = s.replaceAll("FIXED_DOUBLE", "/\\*\\*/double");
 
         out.print(s);
     }
