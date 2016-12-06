@@ -8,19 +8,19 @@ Code written for 64-bit floats (i.e. doubles) is automatically converted into fl
 
 The suffice it searches for can be change from '_F64' into other valid string.
 
-## Conversation Process
+## Transformation Process
 
 The process of converting double math into float math is fairly simple not very 'intelligent'.
 
 1) Copies over the copyright at the start of the file unmodified.
-* This is accomplished by simply copying everything until a line with 4 characters and line[2] == '/' is encountered.
+  * This is accomplished by simply copying everything until a line with 4 characters and line[2] == '/' is encountered.
 2) Break the remainder of the document into words and white space
-* White space is written to the output unmodified
+  * White space is written to the output unmodified
 3) Words are transformed by applying three separate sets of text replacements in order.
-* REGEX matching:  If part of the word matches a regex that portion of the word is replaced with replacement text
-* Starts with matching:  If the word begins with the specified text it is replaced with the replacement text.
-* double replacement: An internally specified regex is used to detect doubles (e.g. 45.0 or 4.) and convert it into a float
-* After REGEX matching: Another round of regex matching.  Can be used to undo an earlier modification
+  * REGEX matching:  If part of the word matches a regex that portion of the word is replaced with replacement text
+  * Starts with matching:  If the word begins with the specified text it is replaced with the replacement text.
+  * double replacement: An internally specified regex is used to detect doubles (e.g. 45.0 or 4.) and convert it into a float
+  * After REGEX matching: Another round of regex matching.  Can be used to undo an earlier modification
 
 See next section below for how to programmically specify each type of text replacement.
 
