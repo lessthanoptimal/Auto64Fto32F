@@ -1,6 +1,6 @@
 Auto64Fto32F:  A minimalist library for converting double (64-bit) numerical Java code into float (32-bit).
 
-Code written for 64-bit floats (i.e. doubles) is automatically converted into float 32-bit code by performing a user specified sequence of keyword replacements.  No special template language is required.  However, a special coding style is required.
+This library is used to create applications that can convert code written with 64-bit floats (i.e. doubles) into 32-bit float code.  This is done by performing specially designed keyword replacements.  No special template language is required.  However, a special coding style is required.
 
 1) Recusively search input directory for files ending in "_F64.java"
 2) Create a new file with the ending "_F32.java"
@@ -10,7 +10,9 @@ The suffice it searches for can be change from '_F64' into other valid string.
 
 ## Transformation Process
 
-The process of converting double math into float math is fairly simple.  It does not attempt to parse the code and does not know if it's examining text inside of comments or not.
+The process of converting double math into float math is fairly simple.  For example, it does not know if the text it is examining is inside a comment or not.  It works by applying a carefully crafted sequence of keyword replacement using regex.
+
+Processing Steps:
 
 1. Copies over the copyright at the start of the file unmodified.
 
@@ -71,7 +73,7 @@ double foo = 1.6*bar +Math.exp(6);
 ```java
 float foo = 1.6f*bar +Math.exp(6);
 ```
-Notice how the converted code will generate a compile time error since Math.exp() returns a double?  Math operators require a space in front.  While annoying this easily handles endge cases that a straight forward keyword swap can't handle.
+Notice how the converted code will generate a compile time error since Math.exp() returns a double?  Math operators require a space in front.  While annoying this easily handles edge cases that a straight forward keyword swap can't handle.
 
 
 ## Author
