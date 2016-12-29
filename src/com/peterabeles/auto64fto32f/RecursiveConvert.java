@@ -48,10 +48,12 @@ public class RecursiveConvert {
 		if( files == null )
 			return;
 
+		int length64 = suffice64.length()+5;
+
 		for( File f : files ) {
 			String n = f.getName();
 			if( n.endsWith( suffice64+".java" ) ) {
-				n = n.substring(0, n.length() - 9) + suffice32+".java";
+				n = n.substring(0, n.length() - length64) + suffice32+".java";
 				try {
 					System.out.println( "Generating " + n );
 					converter.process(f,new File(outputDirectory,n));
