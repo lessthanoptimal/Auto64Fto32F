@@ -1,5 +1,7 @@
+package dummy;
+
 /**
- * Code which is to be converted into F32
+ * Code which is to be converted into F32.  Note that text in comments is converted too.  double, _F64
  *
  * @author Peter Abeles
  */

@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2011-2016, Peter Abeles. All Rights Reserved.
- *
- * This file is part of BoofCV (http://boofcv.org).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.peterabeles.auto64fto32f;
 
 import java.io.*;
@@ -54,7 +36,6 @@ public class ConvertFile32From64 {
             replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/double");
         }
     }
-
     /**
      * Applies the specified keyword replacements to the input file and saves the results to the output file
      * @param inputFile File that is to be transformed. Unmodified.
@@ -69,15 +50,58 @@ public class ConvertFile32From64 {
         StringBuffer s = new StringBuffer(1024);
         boolean prevChar = false;
 
-        // copyright is a special case and don't wont it turning Apache 2.0 info 2.0f
-        copyTheCopyRight(s);
+        State state = State.INITIALIZING;
+        int totalTokens = 0;
+        boolean insideBlockComments = false;
+        boolean insideLineComment = false;
 
         while ((n = in.read()) != -1) {
+            if( insideLineComment && (n == '\n' || n == '\r')) {
+                insideLineComment = false;
+            }
             if (Character.isWhitespace((char) n)) {
                 if (prevChar) {
-                    handleToken(s.toString());
+                    String token = s.toString();
+                    if( insideBlockComments ) {
+                        if( token.startsWith("*/") )
+                            insideBlockComments = false;
+                    }
+                    if( !(insideBlockComments||insideLineComment) ){
+                        if( token.startsWith("/*") )
+                            insideBlockComments = true;
+                        else if( token.startsWith("//"))
+                            insideLineComment = true;
+                    }
+                    switch( state ) {
+                        case INITIALIZING:
+                            if(totalTokens==0 && token.startsWith("/*") ) {
+                                state = State.INSIDE_COPYRIGHT;
+                            } else if( !(insideBlockComments||insideLineComment) && token.compareTo("class") == 0 ) {
+                                state = State.BEFORE_CLASS_NAME;
+                            }
+                            handleToken(token);
+                            break;
+
+                        case INSIDE_COPYRIGHT:
+                            if( token.compareTo("*/") == 0 ) {
+                                state = State.INITIALIZING;
+                            }
+                            out.print(token);
+                            break;
+
+                        case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
+                            state = State.MAIN;
+                            String name = outputFile.getName();
+                            out.print(name.substring(0,name.length()-5));
+                            break;
+
+                        case MAIN:
+                            handleToken(token);
+                            break;
+                    }
                     s.delete(0, s.length());
                     prevChar = false;
+                    totalTokens++;
                 }
                 out.write(n);
             } else {
@@ -93,24 +117,6 @@ public class ConvertFile32From64 {
         out.close();
         in.close();
 
-    }
-
-    private void copyTheCopyRight(StringBuffer s) throws IOException {
-        int n;
-
-        while ((n = in.read()) != -1) {
-            char c = (char) n;
-            s.append(c);
-
-            if (c == '\n') {
-                out.print(s);
-                boolean finished = s.length() == 4 && s.charAt(2) == '/';
-                s.delete(0, s.length());
-                if (finished)
-                    return;
-            }
-
-        }
     }
 
     /**
@@ -192,5 +198,12 @@ public class ConvertFile32From64 {
             this.pattern = pattern;
             this.replacement = replacement;
         }
+    }
+
+    private enum State {
+        INITIALIZING,
+        INSIDE_COPYRIGHT,
+        BEFORE_CLASS_NAME,
+        MAIN
     }
 }

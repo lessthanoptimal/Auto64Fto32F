@@ -8,7 +8,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'com.peterabeles'
-version = '1.0.2'
+version = '1.1'
 
 
 sourceCompatibility = 1.7
