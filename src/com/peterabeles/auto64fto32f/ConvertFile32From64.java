@@ -43,80 +43,86 @@ public class ConvertFile32From64 {
      * @throws IOException If something goes wrong this is thrown.
      */
     public void process(File inputFile, File outputFile ) throws IOException {
-        in = new FileInputStream(inputFile);
-        out = new PrintStream(outputFile);
+        try {
+            in = new FileInputStream(inputFile);
+            out = new PrintStream(outputFile);
 
-        int n;
-        StringBuffer s = new StringBuffer(1024);
-        boolean prevChar = false;
+            int n;
+            StringBuffer s = new StringBuffer(1024);
+            boolean prevChar = false;
 
-        State state = State.INITIALIZING;
-        int totalTokens = 0;
-        boolean insideBlockComments = false;
-        boolean insideLineComment = false;
+            State state = State.INITIALIZING;
+            int totalTokens = 0;
+            boolean insideBlockComments = false;
+            boolean insideLineComment = false;
 
-        while ((n = in.read()) != -1) {
-            if( insideLineComment && (n == '\n' || n == '\r')) {
-                insideLineComment = false;
-            }
-            if (Character.isWhitespace((char) n)) {
-                if (prevChar) {
-                    String token = s.toString();
-                    if( insideBlockComments ) {
-                        if( token.startsWith("*/") )
-                            insideBlockComments = false;
-                    }
-                    if( !(insideBlockComments||insideLineComment) ){
-                        if( token.startsWith("/*") )
-                            insideBlockComments = true;
-                        else if( token.startsWith("//"))
-                            insideLineComment = true;
-                    }
-                    switch( state ) {
-                        case INITIALIZING:
-                            if(totalTokens==0 && token.startsWith("/*") ) {
-                                state = State.INSIDE_COPYRIGHT;
-                            } else if( !(insideBlockComments||insideLineComment) && token.compareTo("class") == 0 ) {
-                                state = State.BEFORE_CLASS_NAME;
-                            }
-                            handleToken(token);
-                            break;
-
-                        case INSIDE_COPYRIGHT:
-                            if( token.compareTo("*/") == 0 ) {
-                                state = State.INITIALIZING;
-                            }
-                            out.print(token);
-                            break;
-
-                        case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
-                            state = State.MAIN;
-                            String name = outputFile.getName();
-                            out.print(name.substring(0,name.length()-5));
-                            break;
-
-                        case MAIN:
-                            handleToken(token);
-                            break;
-                    }
-                    s.delete(0, s.length());
-                    prevChar = false;
-                    totalTokens++;
+            while ((n = in.read()) != -1) {
+                if (insideLineComment && (n == '\n' || n == '\r')) {
+                    insideLineComment = false;
                 }
-                out.write(n);
-            } else {
-                prevChar = true;
-                s.append((char) n);
+                if (Character.isWhitespace((char) n)) {
+                    if (prevChar) {
+                        String token = s.toString();
+                        if (insideBlockComments) {
+                            if (token.startsWith("*/"))
+                                insideBlockComments = false;
+                        }
+                        if (!(insideBlockComments || insideLineComment)) {
+                            if (token.startsWith("/*"))
+                                insideBlockComments = true;
+                            else if (token.startsWith("//"))
+                                insideLineComment = true;
+                        }
+                        switch (state) {
+                            case INITIALIZING:
+                                if (totalTokens == 0 && token.startsWith("/*")) {
+                                    state = State.INSIDE_COPYRIGHT;
+                                } else if (!(insideBlockComments || insideLineComment) && token.compareTo("class") == 0) {
+                                    state = State.BEFORE_CLASS_NAME;
+                                }
+                                handleToken(token);
+                                break;
+
+                            case INSIDE_COPYRIGHT:
+                                if (token.compareTo("*/") == 0) {
+                                    state = State.INITIALIZING;
+                                }
+                                out.print(token);
+                                break;
+
+                            case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
+                                state = State.MAIN;
+                                String name = outputFile.getName();
+                                out.print(name.substring(0, name.length() - 5));
+                                break;
+
+                            case MAIN:
+                                handleToken(token);
+                                break;
+                        }
+                        s.delete(0, s.length());
+                        prevChar = false;
+                        totalTokens++;
+                    }
+                    out.write(n);
+                } else {
+                    prevChar = true;
+                    s.append((char) n);
+                }
             }
+
+            if (prevChar) {
+                handleToken(s.toString());
+            }
+        } catch( IOException e ) {
+            throw e;
+        } finally {
+            out.close();
+            in.close();
+            // Crashes when run in travis-ci with no error message.  Maybe file descriptors
+            // are running out because the GC isn't running?
+            System.gc();
         }
-
-        if (prevChar) {
-            handleToken(s.toString());
-        }
-
-        out.close();
-        in.close();
-
     }
 
     /**
@@ -169,6 +175,7 @@ public class ConvertFile32From64 {
         }
 
         out.print(s);
+        out.flush();
     }
 
     /**

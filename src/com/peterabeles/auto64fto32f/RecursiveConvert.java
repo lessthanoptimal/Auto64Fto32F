@@ -1,7 +1,6 @@
 package com.peterabeles.auto64fto32f;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Traverses through a directory tree recursively converting code from double into floats.
@@ -57,7 +56,11 @@ public class RecursiveConvert {
 				try {
 					System.out.println( "Generating " + n );
 					converter.process(f,new File(outputDirectory,n));
-				} catch( IOException e ) {
+				} catch( Exception e ) {
+					System.out.println("\n\n\nCode generation failed!");
+					e.printStackTrace();
+					System.out.flush();
+					System.err.flush();
 					throw new RuntimeException( e );
 				}
 			}
