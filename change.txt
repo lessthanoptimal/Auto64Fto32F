@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+Version 1.2
+
+- Attempts to debug a crash in Travis CI
+  * Mostly adding flush and error messages
+
+
+------------------------------------------------------------------------------
 Version 1.1
 
 - Class name is now forced to be the same as the file name
