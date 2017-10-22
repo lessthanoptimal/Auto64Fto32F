@@ -1,4 +1,12 @@
 ------------------------------------------------------------------------------
+Version 1.3
+
+- All tokens that contain /**/ are ignored.
+  Before ignore statements had to be explicitly added by converting then converting back
+- Added //NOFILTER special token. The //NOFILTER is removed and everything after it is inserted as is
+  This is to get around IntelliJ auto import removing all special encoding from an import statement
+
+------------------------------------------------------------------------------
 Version 1.2
 
 - Attempts to debug a crash in Travis CI

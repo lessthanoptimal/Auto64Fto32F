@@ -19,13 +19,15 @@ public class ConvertFile32From64 {
     List<Replacement> replaceStartsWith = new ArrayList<>();
     List<Replacement> replacementsAfter = new ArrayList<>();
 
+    boolean skipFilterOnLine;
+
     /**
      * Constructor
      * @param addDefaultReplacements If true all of the defaults replacement patterns are applied.
      */
     public ConvertFile32From64( boolean addDefaultReplacements ) {
         if( addDefaultReplacements ) {
-            replacePattern("/\\*\\*/double", "FIXED_DOUBLE");
+//            replacePattern("/\\*\\*/double", "FIXED_DOUBLE");
             replacePattern("double", "float");
             replacePattern("Double", "Float");
             replacePattern("_F64", "_F32");
@@ -56,12 +58,22 @@ public class ConvertFile32From64 {
             boolean insideBlockComments = false;
             boolean insideLineComment = false;
 
+            int lineCharacterCount = 0;
+            skipFilterOnLine = false;
+
             while ((n = in.read()) != -1) {
-                if (insideLineComment && (n == '\n' || n == '\r')) {
-                    insideLineComment = false;
+                if( n == '\n' || n == '\r' ) {
+                    lineCharacterCount = 0;
+                    if (insideLineComment ) {
+                        insideLineComment = false;
+                    }
+                } else {
+                    lineCharacterCount++;
                 }
+
                 if (Character.isWhitespace((char) n)) {
                     if (prevChar) {
+                        boolean skip = false;
                         String token = s.toString();
                         if (insideBlockComments) {
                             if (token.startsWith("*/"))
@@ -73,38 +85,50 @@ public class ConvertFile32From64 {
                             else if (token.startsWith("//"))
                                 insideLineComment = true;
                         }
-                        switch (state) {
-                            case INITIALIZING:
-                                if (totalTokens == 0 && token.startsWith("/*")) {
-                                    state = State.INSIDE_COPYRIGHT;
-                                } else if (!(insideBlockComments || insideLineComment) && token.compareTo("class") == 0) {
-                                    state = State.BEFORE_CLASS_NAME;
-                                }
-                                handleToken(token);
-                                break;
 
-                            case INSIDE_COPYRIGHT:
-                                if (token.compareTo("*/") == 0) {
-                                    state = State.INITIALIZING;
-                                }
-                                out.print(token);
-                                break;
+                        if( insideLineComment && lineCharacterCount == token.length()+1 ) {
+                            if( token.startsWith("//NOFILTER")) {
+                                skipFilterOnLine = true;
+                                skip = true;
+                            }
+                        }
+                        if( !skip ) {
+                            switch (state) {
+                                case INITIALIZING:
+                                    if (totalTokens == 0 && token.startsWith("/*")) {
+                                        state = State.INSIDE_COPYRIGHT;
+                                    } else if (!(insideBlockComments || insideLineComment) && token.compareTo("class") == 0) {
+                                        state = State.BEFORE_CLASS_NAME;
+                                    }
+                                    handleToken(token);
+                                    break;
 
-                            case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
-                                state = State.MAIN;
-                                String name = outputFile.getName();
-                                out.print(name.substring(0, name.length() - 5));
-                                break;
+                                case INSIDE_COPYRIGHT:
+                                    if (token.compareTo("*/") == 0) {
+                                        state = State.INITIALIZING;
+                                    }
+                                    out.print(token);
+                                    break;
 
-                            case MAIN:
-                                handleToken(token);
-                                break;
+                                case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
+                                    state = State.MAIN;
+                                    String name = outputFile.getName();
+                                    out.print(name.substring(0, name.length() - 5));
+                                    break;
+
+                                case MAIN:
+                                    handleToken(token);
+                                    break;
+                            }
                         }
                         s.delete(0, s.length());
                         prevChar = false;
                         totalTokens++;
                     }
                     out.write(n);
+                    if( n == '\n' || n == '\r' ) {
+                        skipFilterOnLine = false;
+                    }
                 } else {
                     prevChar = true;
                     s.append((char) n);
@@ -157,21 +181,23 @@ public class ConvertFile32From64 {
     }
 
     private void handleToken(String s) {
-        for (int i = 0; i < replacements.size(); i++) {
-            Replacement r = replacements.get(i);
-            s = s.replaceAll(r.pattern, r.replacement);
-        }
+        if( !skipFilterOnLine && !s.contains("/**/") ) {
+            for (int i = 0; i < replacements.size(); i++) {
+                Replacement r = replacements.get(i);
+                s = s.replaceAll(r.pattern, r.replacement);
+            }
 
-        for (int i = 0; i < replaceStartsWith.size(); i++) {
-            Replacement r = replaceStartsWith.get(i);
-            s = replaceStartString(s, r.pattern, r.replacement);
-        }
+            for (int i = 0; i < replaceStartsWith.size(); i++) {
+                Replacement r = replaceStartsWith.get(i);
+                s = replaceStartString(s, r.pattern, r.replacement);
+            }
 
-        s = handleFloats(s);
+            s = handleFloats(s);
 
-        for (int i = 0; i < replacementsAfter.size(); i++) {
-            Replacement r = replacementsAfter.get(i);
-            s = s.replaceAll(r.pattern, r.replacement);
+            for (int i = 0; i < replacementsAfter.size(); i++) {
+                Replacement r = replacementsAfter.get(i);
+                s = s.replaceAll(r.pattern, r.replacement);
+            }
         }
 
         out.print(s);
