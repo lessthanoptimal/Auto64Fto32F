@@ -4,6 +4,7 @@ Version 1.4
 
 - Added //CUSTOM keyword at the start of line
   * Can be used ot specify keywords which should be ignored
+  * E.g. //CUSTOM ignore FOobar64
 
 ------------------------------------------------------------------------------
 Version 1.3
