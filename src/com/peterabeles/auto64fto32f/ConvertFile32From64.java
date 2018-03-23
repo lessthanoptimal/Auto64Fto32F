@@ -15,6 +15,8 @@ public class ConvertFile32From64 {
     InputStream in;
     PrintStream out;
 
+    // file specified custom list of ignore tokens
+    List<String> customIgnore = new ArrayList<>();
     List<Replacement> replacements = new ArrayList<>();
     List<Replacement> replaceStartsWith = new ArrayList<>();
     List<Replacement> replacementsAfter = new ArrayList<>();
@@ -43,6 +45,8 @@ public class ConvertFile32From64 {
      * @throws IOException If something goes wrong this is thrown.
      */
     public void process(File inputFile, File outputFile ) throws IOException {
+        scanForCustomization(inputFile);
+
         try {
             in = new FileInputStream(inputFile);
             out = new PrintStream(outputFile);
@@ -125,6 +129,25 @@ public class ConvertFile32From64 {
         }
     }
 
+    public void scanForCustomization( File inputFile ) throws IOException {
+        customIgnore.clear();
+
+        BufferedReader in = new BufferedReader(new FileReader(inputFile));
+
+        String line;
+        while( (line = in.readLine()) != null ) {
+            if( !line.startsWith("//CUSTOM"))
+                continue;
+
+            String words[] = line.substring(9,line.length()).split(" ");
+            if( words[0].equals("ignore")) {
+                customIgnore.add(words[1]);
+            }
+        }
+
+        in.close();
+    }
+
     /**
      * Adds a text replacement rule.  These will be run in the first pass
      *
@@ -157,21 +180,31 @@ public class ConvertFile32From64 {
     }
 
     private void handleToken(String s) {
-        for (int i = 0; i < replacements.size(); i++) {
-            Replacement r = replacements.get(i);
-            s = s.replaceAll(r.pattern, r.replacement);
+        boolean ignore = false;
+        for (int i = 0; i < customIgnore.size(); i++) {
+            if( s.equals(customIgnore.get(i))) {
+                ignore = true;
+                break;
+            }
         }
 
-        for (int i = 0; i < replaceStartsWith.size(); i++) {
-            Replacement r = replaceStartsWith.get(i);
-            s = replaceStartString(s, r.pattern, r.replacement);
-        }
+        if( !ignore ) {
+            for (int i = 0; i < replacements.size(); i++) {
+                Replacement r = replacements.get(i);
+                s = s.replaceAll(r.pattern, r.replacement);
+            }
 
-        s = handleFloats(s);
+            for (int i = 0; i < replaceStartsWith.size(); i++) {
+                Replacement r = replaceStartsWith.get(i);
+                s = replaceStartString(s, r.pattern, r.replacement);
+            }
 
-        for (int i = 0; i < replacementsAfter.size(); i++) {
-            Replacement r = replacementsAfter.get(i);
-            s = s.replaceAll(r.pattern, r.replacement);
+            s = handleFloats(s);
+
+            for (int i = 0; i < replacementsAfter.size(); i++) {
+                Replacement r = replacementsAfter.get(i);
+                s = s.replaceAll(r.pattern, r.replacement);
+            }
         }
 
         out.print(s);

@@ -1,5 +1,7 @@
 package dummy;
 
+//CUSTOM ignore Box3D_F64
+
 /**
  * Code which is to be converted into F32.  Note that text in comments is converted too.  double, _F64
  *
@@ -24,5 +26,10 @@ public class DummyCode_F64 {
     public static class Sphere3D_F64 {
         public double x,y,z;
         public double radius;
+    }
+
+    public static class Box3D_F64 {
+        public double x,y,z;
+        public double width,height,length;
     }
 }

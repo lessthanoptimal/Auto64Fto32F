@@ -1,4 +1,10 @@
 ------------------------------------------------------------------------------
+Version 1.3
+
+- Added //CUSTOM keyword at the start of line
+  * Can be used ot specify keywords which should be ignored
+
+------------------------------------------------------------------------------
 Version 1.2
 
 - Attempts to debug a crash in Travis CI
