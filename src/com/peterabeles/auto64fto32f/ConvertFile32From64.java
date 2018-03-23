@@ -47,6 +47,8 @@ public class ConvertFile32From64 {
      * @throws IOException If something goes wrong this is thrown.
      */
     public void process(File inputFile, File outputFile ) throws IOException {
+        scanForCustomization(inputFile);
+
         try {
             in = new FileInputStream(inputFile);
             out = new PrintStream(outputFile);
