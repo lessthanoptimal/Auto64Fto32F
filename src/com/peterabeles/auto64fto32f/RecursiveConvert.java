@@ -30,14 +30,14 @@ public class RecursiveConvert {
 
 	public void process( File inputDirectory , File outputDirectory ) {
 		if( !inputDirectory.isDirectory() ) {
-			throw new IllegalArgumentException( "Input isn't a directory" );
+			throw new IllegalArgumentException( "Not a directory. "+inputDirectory.getPath() );
 		}
 		if( !outputDirectory.exists() ) {
 			if( !outputDirectory.mkdirs() ) {
-				throw new RuntimeException("Can't create output directory");
+				throw new RuntimeException("Can't create output directory. "+outputDirectory.getPath());
 			}
 		} if( !outputDirectory.isDirectory() ) {
-			throw new IllegalArgumentException( "Output isn't a directory" );
+			throw new IllegalArgumentException( "Output isn't a directory. "+outputDirectory.getPath() );
 		}
 
 		System.out.println( "---- Directory " + inputDirectory );
