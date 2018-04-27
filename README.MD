@@ -103,4 +103,4 @@ This software is released under multiple licenses; Unlicense, MIT License, and L
 
 ## Author
 
-This software is written by Peter Abeles and has been released as public domain software.  See UNLICENSE
+This software is written by Peter Abeles
