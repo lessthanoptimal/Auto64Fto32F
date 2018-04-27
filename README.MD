@@ -101,8 +101,6 @@ float foo = 1.6f*bar + (float)Math.exp(6);
 
 This software is released under multiple licenses; Unlicense, MIT License, and Lob a Nuclear Missile at my Home License (LANMAMHL). You may choose one or all of these licenses when using this software. For specific details on Unlicense and MIT License look at the UNLICENSE and LICENSE-MIT files, respectively. The LANMAMHL gives you explicit permission to use and distribute this software on a nuclear missile aimed and launched at my home.
 
-This project is dual-licensed under the Unlicense and MIT licenses
-
 ## Author
 
 This software is written by Peter Abeles and has been released as public domain software.  See UNLICENSE
