@@ -97,6 +97,10 @@ double foo = 1.6*bar + Math.exp(6);
 float foo = 1.6f*bar + (float)Math.exp(6);
 ```
 
+## License
+
+This software is released under multiple licenses; Unlicense and MIT License. You may choose one or all of these licenses when using this software. For specific details on Unlicense and MIT License look at the UNLICENSE and LICENSE-MIT files, respectively.
+
 ## Author
 
-This software is written by Peter Abeles and has been released as public domain software.  See UNLICENSE
+This software is written by Peter Abeles

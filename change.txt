@@ -5,6 +5,11 @@ Version 2.0
 - Start of multi language support
 
 ------------------------------------------------------------------------------
+Version 1.4.1
+
+- Change to a dual license: Unlicense and MIT
+
+------------------------------------------------------------------------------
 Version 1.4
 
 - Added //CUSTOM keyword at the start of line

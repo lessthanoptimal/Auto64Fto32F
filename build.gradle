@@ -103,6 +103,10 @@ if( project.hasProperty('ossrhUsername') ) {
                             name 'Public Domain'
                             url 'http://unlicense.org/'
                         }
+                        license {
+                            name 'MIT'
+                            url 'https://opensource.org/licenses/MIT'
+                        }
                     }
 
                     developers {
