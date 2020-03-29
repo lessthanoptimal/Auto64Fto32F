@@ -3,12 +3,11 @@ ext.libpath = file('./').absolutePath
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'java'
-apply plugin: 'osgi'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'com.peterabeles'
-version = '1.4'
+version = '2.0-SNAPSHOT'
 
 
 sourceCompatibility = 1.8
@@ -35,13 +34,6 @@ dependencies {
 javadoc {
     configure(options) {
         failOnError = false
-    }
-}
-
-jar {
-    manifest { // the manifest of the default jar is of type OsgiManifest
-        instruction 'Bundle-Vendor', 'Peter Abeles'
-        instruction 'Bundle-DocURL', 'http://peterabeles.com'
     }
 }
 
@@ -132,7 +124,8 @@ task testReport(type: TestReport) {
     reportOn subprojects*.test
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.3'
+wrapper {
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = '6.2.2'
 }
 

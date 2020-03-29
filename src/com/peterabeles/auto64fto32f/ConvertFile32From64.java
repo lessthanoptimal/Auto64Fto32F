@@ -23,23 +23,35 @@ public class ConvertFile32From64 {
 
     boolean skipFilterOnLine;
 
+    private Language language = Language.JAVA;
+
     /**
      * Constructor
      * @param addDefaultReplacements If true all of the defaults replacement patterns are applied.
      */
-    public ConvertFile32From64( boolean addDefaultReplacements ) {
+    public ConvertFile32From64( Language language, boolean addDefaultReplacements ) {
         if( addDefaultReplacements ) {
+            if( language == Language.JAVA ) {
 //            replacePattern("/\\*\\*/double", "FIXED_DOUBLE");
-            replacePattern("double", "float");
-            replacePattern("Double", "Float");
-            replacePattern("_F64", "_F32");
+                replacePattern("double", "float");
+                replacePattern("Double", "Float");
+                replacePattern("_F64", "_F32");
 
-            replaceStartsWith("Math.", "(float)Math.");
-            replaceStartsWith("-Math.", "(float)-Math.");
+                replaceStartsWith("Math.", "(float)Math.");
+                replaceStartsWith("-Math.", "(float)-Math.");
 
-            replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/double");
+                replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/double");
+            } else if( language == Language.KOTLIN ) {
+                replacePattern("Double", "Float");
+                replacePattern("_F64", "_F32");
+                replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/Double");
+            }
         }
     }
+    public ConvertFile32From64( boolean addDefaultReplacements ) {
+        this(Language.JAVA,addDefaultReplacements);
+    }
+
     /**
      * Applies the specified keyword replacements to the input file and saves the results to the output file
      * @param inputFile File that is to be transformed. Unmodified.
@@ -48,6 +60,8 @@ public class ConvertFile32From64 {
      */
     public void process(File inputFile, File outputFile ) throws IOException {
         scanForCustomization(inputFile);
+
+        int langLength = language.length();
 
         try {
             in = new FileInputStream(inputFile);
@@ -101,7 +115,8 @@ public class ConvertFile32From64 {
                                 case INITIALIZING:
                                     if (totalTokens == 0 && token.startsWith("/*")) {
                                         state = State.INSIDE_COPYRIGHT;
-                                    } else if (!(insideBlockComments || insideLineComment) && token.compareTo("class") == 0) {
+                                    } else if (!(insideBlockComments || insideLineComment) &&
+                                            token.compareTo("class") == 0 && token.compareTo("interface") == 0) {
                                         state = State.BEFORE_CLASS_NAME;
                                     }
                                     handleToken(token);
@@ -117,7 +132,7 @@ public class ConvertFile32From64 {
                                 case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
                                     state = State.MAIN;
                                     String name = outputFile.getName();
-                                    out.print(name.substring(0, name.length() - 5));
+                                    out.print(name.substring(0, name.length() - langLength));
                                     break;
 
                                 case MAIN:
@@ -252,6 +267,14 @@ public class ConvertFile32From64 {
         } else {
             return input;
         }
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 
     private static class Replacement {

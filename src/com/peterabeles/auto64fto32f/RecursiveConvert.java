@@ -14,6 +14,7 @@ public class RecursiveConvert {
 	private String suffice64 = "_F64";
 	private String suffice32 = "_F32";
 
+	private Language language = Language.JAVA;
 
 	public RecursiveConvert(ConvertFile32From64 converter ) {
 		this.converter = converter;
@@ -39,6 +40,7 @@ public class RecursiveConvert {
 		} if( !outputDirectory.isDirectory() ) {
 			throw new IllegalArgumentException( "Output isn't a directory. "+outputDirectory.getPath() );
 		}
+		converter.setLanguage(language);
 
 		System.out.println( "---- Directory " + inputDirectory );
 
@@ -47,12 +49,14 @@ public class RecursiveConvert {
 		if( files == null )
 			return;
 
-		int length64 = suffice64.length()+5;
+		int length64 = suffice64.length()+language.length();
+
+		String langSuffix = language.suffix();
 
 		for( File f : files ) {
 			String n = f.getName();
-			if( n.endsWith( suffice64+".java" ) ) {
-				n = n.substring(0, n.length() - length64) + suffice32+".java";
+			if( n.endsWith( suffice64+langSuffix ) ) {
+				n = n.substring(0, n.length() - length64) + suffice32+langSuffix;
 				try {
 					System.out.println( "Generating " + n );
 					converter.process(f,new File(outputDirectory,n));
@@ -71,5 +75,13 @@ public class RecursiveConvert {
 				process( f , new File(outputDirectory,f.getName()));
 			}
 		}
+	}
+
+	public Language getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(Language language) {
+		this.language = language;
 	}
 }
