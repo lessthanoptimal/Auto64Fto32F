@@ -116,7 +116,7 @@ public class ConvertFile32From64 {
                                     if (totalTokens == 0 && token.startsWith("/*")) {
                                         state = State.INSIDE_COPYRIGHT;
                                     } else if (!(insideBlockComments || insideLineComment) &&
-                                            token.compareTo("class") == 0 && token.compareTo("interface") == 0) {
+                                            (token.compareTo("class") == 0 || token.compareTo("interface") == 0)) {
                                         state = State.BEFORE_CLASS_NAME;
                                     }
                                     handleToken(token);
