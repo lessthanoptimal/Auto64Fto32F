@@ -7,10 +7,18 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'com.peterabeles'
-version = '2.0'
+version = '2.0.1'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_14
+}
+
+// Creates Java 8 byte code
+compileJava {
+    options.compilerArgs += [ "--release", "8"]
+//        options.compilerArgs += '--enable-preview'
+}
 
 repositories {
     mavenCentral()
