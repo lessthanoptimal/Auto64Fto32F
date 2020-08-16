@@ -7,10 +7,12 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'com.peterabeles'
-version = '2.0'
+version = '2.1-SNAPSHOT'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 repositories {
     mavenCentral()
@@ -121,14 +123,8 @@ if( project.hasProperty('ossrhUsername') ) {
     }
 }
 
-
-task testReport(type: TestReport) {
-    destinationDir = file("$buildDir/reports/allTests")
-    reportOn subprojects*.test
-}
-
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '6.3'
+    gradleVersion = '6.4.1'
 }
 
