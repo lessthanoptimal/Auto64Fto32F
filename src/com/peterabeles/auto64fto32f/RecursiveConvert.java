@@ -49,24 +49,27 @@ public class RecursiveConvert {
 		if( files == null )
 			return;
 
-		int length64 = suffice64.length()+language.length();
 
-		String langSuffix = language.suffix();
+		String fileEnding64 = suffice64 + "." + language.suffix();
+		String fileEnding32 = suffice32 + "." + language.suffix();
+		int length64 = fileEnding64.length();
 
 		for( File f : files ) {
+			if( !f.isFile() )
+				continue;
 			String n = f.getName();
-			if( n.endsWith( suffice64+langSuffix ) ) {
-				n = n.substring(0, n.length() - length64) + suffice32+langSuffix;
-				try {
-					System.out.println( "Generating " + n );
-					converter.process(f,new File(outputDirectory,n));
-				} catch( Exception e ) {
-					System.out.println("\n\n\nCode generation failed!");
-					e.printStackTrace();
-					System.out.flush();
-					System.err.flush();
-					throw new RuntimeException( e );
-				}
+			if( !n.endsWith(fileEnding64) )
+				continue;
+			n = n.substring(0, n.length() - length64) + fileEnding32;
+			try {
+				System.out.println( "Generating " + n );
+				converter.process(f,new File(outputDirectory,n));
+			} catch( Exception e ) {
+				System.out.println("\n\n\nCode generation failed!");
+				e.printStackTrace();
+				System.out.flush();
+				System.err.flush();
+				throw new RuntimeException( e );
 			}
 		}
 

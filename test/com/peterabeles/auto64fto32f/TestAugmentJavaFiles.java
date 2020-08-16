@@ -29,7 +29,7 @@ public class TestAugmentJavaFiles {
                 "public class DummyCode_F64 {}\n";
 
         var alg = new AugmentJavaFiles();
-        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),"DummyCode_F64");
         String found = new Scanner(foundStream).useDelimiter("\\A").next();
 
         assertEquals(expected,found);
@@ -50,7 +50,7 @@ public class TestAugmentJavaFiles {
                 "public interface DummyCode_F64 {}\n";
 
         var alg = new AugmentJavaFiles();
-        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),"DummyCode_F64");
         String found = new Scanner(foundStream).useDelimiter("\\A").next();
 
         assertEquals(expected,found);
@@ -66,7 +66,7 @@ public class TestAugmentJavaFiles {
                 "public class DummyCode_F64 {}\n";
 
         var alg = new AugmentJavaFiles();
-        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),"DummyCode_F64");
         String found = new Scanner(foundStream).useDelimiter("\\A").next();
 
         assertEquals(input,found);
@@ -93,7 +93,7 @@ public class TestAugmentJavaFiles {
                 "}\n";
 
         var alg = new AugmentJavaFiles();
-        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        InputStream foundStream = alg.augment(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),"DummyCode_F64");
         String found = new Scanner(foundStream).useDelimiter("\\A").next();
 
         assertEquals(expected,found);

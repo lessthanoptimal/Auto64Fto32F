@@ -13,9 +13,14 @@ import java.util.Scanner;
  * @author Peter Abeles
  */
 public class AugmentJavaFiles {
-    String className="ERROR";
-
-    public InputStream augment( InputStream stream ) throws IOException {
+    /**
+     * Augments the input stream and returns a new stream with the augmentations
+     *
+     * @param stream Stream after being converted to 32
+     * @param originalFileName Original name of file used to generate it
+     * @return New stream after being augmented
+     */
+    public InputStream augment( InputStream stream , String originalFileName) throws IOException {
         // Copy the entire stream into memory to make random access easier
         String content = new Scanner(stream).useDelimiter("\\A").next();
 
@@ -41,7 +46,7 @@ public class AugmentJavaFiles {
         }
 
         builder.append(content,indexOfImport,indexOfClass);
-        builder.append("@Generated(\""+packageName+className+"\")\n");
+        builder.append("@Generated(\""+packageName+originalFileName+"\")\n");
         builder.append(content,indexOfClass,content.length());
 
         return new ByteArrayInputStream(builder.toString().getBytes(StandardCharsets.UTF_8));
@@ -123,7 +128,7 @@ public class AugmentJavaFiles {
             String[] words = line.split("\\s+");
 
             // make sure 'class' is a word and assume that 'class' and the class name are on the same line
-            className = null;
+            String className = null;
             for (int i = 0; i < words.length-1; i++) {
                 if( !words[i].equals(keyword))
                     continue;
