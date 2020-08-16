@@ -23,7 +23,7 @@ Processing Steps:
    White space is written to the output unmodified
    
 3. Words are transformed by applying four separate sets of filters in the following order.
-  * REGEX matching:  If part of the word matches a regex that portion of the word is replaced with replacement text
+  * REGEX matching:  If part of the word matches a regex that portion of the word is replaced with the replacement text
   * Starts with matching:  If the word begins with the specified text it is replaced with the replacement text.
   * double replacement: An internally specified regex is used to detect doubles (e.g. 45.0 or 4.) and convert it into a float
   * After REGEX matching: Another round of regex matching.  Can be used to undo an earlier modification
@@ -76,7 +76,7 @@ Converted Code:
 float foo = 1.6f*bar + (float)Math.exp(6) + (float)moo;
 ```
 
-The sequence ```/**/double``` is searched for an ignored, thus it will remain a double in the floating point code.  ```/**/Math``` will not be typecasted because there is no space in front of Math.  More on that Math issue later.  
+The sequence ```/**/double``` is searched for and ignored, thus it will remain a double in the floating point code.  ```/**/Math``` will not be typecasted because there is no space in front of Math.  More on that Math issue later.  
 
 To avoid a compile time exception in the float code the variable 'moo' needs to be converted into a float. That is accomplished through a gratuitous (double) typecast.
 
