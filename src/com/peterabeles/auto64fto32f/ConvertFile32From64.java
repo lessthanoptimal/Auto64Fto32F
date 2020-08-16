@@ -138,7 +138,11 @@ public class ConvertFile32From64 {
 
                                 case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
                                     state = State.MAIN;
-                                    out.print(fileNameNoExtension(outputFile,language));
+                                    // In Java there could be Generics touching the class name E.g. class Foo<A>
+                                    // make sure we keep that extra info
+                                    String inputName = fileNameNoExtension(inputFile,language);
+                                    String outputName = fileNameNoExtension(outputFile,language);
+                                    out.print(outputName + token.substring(inputName.length()));
                                     break;
 
                                 case MAIN:

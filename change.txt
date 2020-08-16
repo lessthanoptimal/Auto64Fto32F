@@ -5,6 +5,7 @@ Version 2.1
   * Java only for now
   * If true the generated files will be marked as being auto generated using annotations
   * Useful for static code tests that skip over auto generated files
+- Fixed issue with generics touching class name in Java
 
 ------------------------------------------------------------------------------
 Version 2.0
