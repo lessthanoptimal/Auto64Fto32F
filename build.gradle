@@ -1,35 +1,42 @@
 ext.libpath = file('./').absolutePath
 
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group = 'com.peterabeles'
-version = '2.1'
+version = '2.2-SNAPSHOT'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
+    withSourcesJar()
+    toolchain { languageVersion = JavaLanguageVersion.of(15) }
 }
 
 repositories {
     mavenCentral()
     mavenLocal()
 
-    maven {
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 test {
-    ignoreFailures true
+    useJUnitPlatform()
     reports.html.enabled = false
 }
 
+sourceSets {
+    examples { java { srcDir 'examples' } }
+}
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    examplesImplementation project.sourceSets.main.compileClasspath
+    examplesImplementation project.sourceSets.main.runtimeClasspath
+
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.0')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
+
+    testImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 }
 
 javadoc {
@@ -38,93 +45,64 @@ javadoc {
     }
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+// if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
+if( !project.hasProperty('ossrhUsername') ) {
+    ext.ossrhUsername = "dummy"
+    ext.ossrhPassword = "dummy"
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Auto64Fto32F'
+                description = 'A minimalist library for converting double (64-bit) numerical Java code into float (32-bit)'
+                url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                    license {
+                        name = 'Public Domain'
+                        url = 'http://unlicense.org/'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'pabeles'
+                        name = 'Peter Abeles'
+                        email = 'peter.abeles@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                    developerConnection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                    url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
+                }
+            }
         }
     }
-
-    test {
-        java {
-            srcDir 'test'
-            srcDir 'examples'
-        }
-    }
-}
-
-// if Maven central isn't setup in gradle.properties skip all of this
-if( project.hasProperty('ossrhUsername') ) {
-    signing {
-        sign configurations.archives
-    }
-
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                pom.project {
-                    name 'Auto64Fto32F'
-                    packaging 'pom'
-                    // optionally artifactId can be defined here
-                    description 'A minimalist library for converting double (64-bit) numerical Java code into float (32-bit)'
-                    url 'http://boofcv.org'
-
-                    scm {
-                        connection 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
-                        developerConnection 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
-                        url 'https://github.com/lessthanoptimal/Auto64Fto32F'
-                    }
-
-                    licenses {
-                        license {
-                            name 'Public Domain'
-                            url 'http://unlicense.org/'
-                        }
-                        license {
-                            name 'MIT'
-                            url 'https://opensource.org/licenses/MIT'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id 'pabeles'
-                            name 'Peter Abeles'
-                            email 'peter.abeles@gmail.com'
-                        }
-                    }
-                }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
 }
 
+//if (ext.ossrhPassword != "dummy") {
+//    signing { sign publishing.publications.mavenJava }
+//}
+
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '6.4.1'
+    gradleVersion = '6.8.3'
 }
 

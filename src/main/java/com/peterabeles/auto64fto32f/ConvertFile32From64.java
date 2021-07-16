@@ -235,8 +235,9 @@ public class ConvertFile32From64 {
 
     private void handleToken(String s) {
         boolean ignore = false;
+
         for (int i = 0; i < customIgnore.size(); i++) {
-            if( s.equals(customIgnore.get(i))) {
+            if( s.contains(customIgnore.get(i))) {
                 ignore = true;
                 break;
             }
