@@ -97,9 +97,9 @@ publishing {
     }
 }
 
-//if (ext.ossrhPassword != "dummy") {
-//    signing { sign publishing.publications.mavenJava }
-//}
+if (ext.ossrhPassword != "dummy") {
+    signing { sign publishing.publications.mavenJava }
+}
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
