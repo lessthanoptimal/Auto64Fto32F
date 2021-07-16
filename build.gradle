@@ -13,11 +13,15 @@ java {
     toolchain { languageVersion = JavaLanguageVersion.of(15) }
 }
 
+// Creates Java 8 byte code
+tasks.withType(JavaCompile).configureEach { options.release = 8 }
+
 repositories {
     mavenCentral()
     mavenLocal()
 
     maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url = 'https://jitpack.io' } // Allows annotations past Java 8 to be used
 }
 
 test {
@@ -37,6 +41,8 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
 
     testImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+
+    annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:0.4.1")
 }
 
 javadoc {
