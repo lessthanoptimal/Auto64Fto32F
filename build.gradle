@@ -1,33 +1,110 @@
 ext.libpath = file('./').absolutePath
 
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+allprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
-group = 'com.peterabeles'
-version = '2.2-SNAPSHOT'
+    group = 'com.peterabeles'
+    version = '2.2-SNAPSHOT'
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-    toolchain { languageVersion = JavaLanguageVersion.of(15) }
+    java {
+        withJavadocJar()
+        withSourcesJar()
+        toolchain { languageVersion = JavaLanguageVersion.of(15) }
+    }
+
+    // Creates Java 8 byte code
+    tasks.withType(JavaCompile).configureEach { options.release = 8 }
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url = 'https://jitpack.io' } // Allows annotations past Java 8 to be used
+    }
+
+    test {
+        useJUnitPlatform()
+        reports.html.enabled = false
+    }
+
+    dependencies {
+        testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.0')
+        testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
+
+        annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:0.4.1")
+    }
+
+    javadoc {
+        configure(options) {
+            failOnError = false
+        }
+    }
+
+    // if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
+    if( !project.hasProperty('ossrhUsername') ) {
+        ext.ossrhUsername = "dummy"
+        ext.ossrhPassword = "dummy"
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                pom {
+                    name = 'Auto64Fto32F'
+                    description = 'A minimalist library for converting double (64-bit) numerical Java code into float (32-bit)'
+                    url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
+                    licenses {
+                        license {
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                        license {
+                            name = 'Public Domain'
+                            url = 'http://unlicense.org/'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'pabeles'
+                            name = 'Peter Abeles'
+                            email = 'peter.abeles@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                        developerConnection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
+                        url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+    }
+
+    if (ext.ossrhPassword != "dummy") {
+        signing { sign publishing.publications.mavenJava }
+    }
 }
 
-// Creates Java 8 byte code
-tasks.withType(JavaCompile).configureEach { options.release = 8 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
 
-    maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url = 'https://jitpack.io' } // Allows annotations past Java 8 to be used
-}
 
-test {
-    useJUnitPlatform()
-    reports.html.enabled = false
-}
+
+
 
 sourceSets {
     examples { java { srcDir 'examples' } }
@@ -37,74 +114,7 @@ dependencies {
     examplesImplementation project.sourceSets.main.compileClasspath
     examplesImplementation project.sourceSets.main.runtimeClasspath
 
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.0')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
-
     testImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-
-    annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:0.4.1")
-}
-
-javadoc {
-    configure(options) {
-        failOnError = false
-    }
-}
-
-// if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
-if( !project.hasProperty('ossrhUsername') ) {
-    ext.ossrhUsername = "dummy"
-    ext.ossrhPassword = "dummy"
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            pom {
-                name = 'Auto64Fto32F'
-                description = 'A minimalist library for converting double (64-bit) numerical Java code into float (32-bit)'
-                url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
-                licenses {
-                    license {
-                        name = 'MIT'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                    license {
-                        name = 'Public Domain'
-                        url = 'http://unlicense.org/'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'pabeles'
-                        name = 'Peter Abeles'
-                        email = 'peter.abeles@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
-                    developerConnection = 'scm:git:git://github.com/lessthanoptimal/Auto64Fto32F.git'
-                    url = 'https://github.com/lessthanoptimal/Auto64Fto32F'
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username ossrhUsername
-                password ossrhPassword
-            }
-        }
-    }
-}
-
-if (ext.ossrhPassword != "dummy") {
-    signing { sign publishing.publications.mavenJava }
 }
 
 wrapper {

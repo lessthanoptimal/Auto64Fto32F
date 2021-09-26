@@ -1,1 +1,3 @@
 rootProject.name = "auto64fto32f"
+
+include "tools"
