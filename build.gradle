@@ -14,8 +14,17 @@ allprojects {
         toolchain { languageVersion = JavaLanguageVersion.of(15) }
     }
 
+    ext.build_java8 = true // IntelliJ has issues when this is set to true
+
     // Creates Java 8 byte code
-    tasks.withType(JavaCompile).configureEach { options.release = 8 }
+    if (project.ext.build_java8)
+        tasks.withType(JavaCompile).configureEach { options.release = 8 }
+
+    project.ext.lombok_version = '1.18.20'
+    project.ext.jabel_version = '0.3.0'
+    project.ext.guava_version = '30.1.1-jre'
+    project.ext.args4j_version = '2.33'
+    project.ext.junit_version = '5.4.0'
 
     repositories {
         mavenCentral()
@@ -30,21 +39,30 @@ allprojects {
         reports.html.enabled = false
     }
 
+    sourceSets {
+        examples { java { srcDir 'examples' } }
+    }
+
     dependencies {
-        testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.0')
-        testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
+        examplesImplementation project.sourceSets.main.compileClasspath
+        examplesImplementation project.sourceSets.main.runtimeClasspath
 
-        annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:0.4.1")
-    }
+        compileOnly "org.projectlombok:lombok:${lombok_version}"
+        compileOnly 'org.jetbrains:annotations:20.0.0' // @Nullable
 
-    javadoc {
-        configure(options) {
-            failOnError = false
+        testImplementation("org.junit.jupiter:junit-jupiter-api:${junit_version}")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit_version}")
+
+        if (project.ext.build_java8) {
+            annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:${jabel_version}")
         }
+        annotationProcessor "org.projectlombok:lombok:${lombok_version}"
     }
+
+    javadoc { configure(options) { failOnError = false } }
 
     // if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
-    if( !project.hasProperty('ossrhUsername') ) {
+    if (!project.hasProperty('ossrhUsername')) {
         ext.ossrhUsername = "dummy"
         ext.ossrhPassword = "dummy"
     }
@@ -98,23 +116,6 @@ allprojects {
     if (ext.ossrhPassword != "dummy") {
         signing { sign publishing.publications.mavenJava }
     }
-}
-
-
-
-
-
-
-
-sourceSets {
-    examples { java { srcDir 'examples' } }
-}
-
-dependencies {
-    examplesImplementation project.sourceSets.main.compileClasspath
-    examplesImplementation project.sourceSets.main.runtimeClasspath
-
-    testImplementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 }
 
 wrapper {

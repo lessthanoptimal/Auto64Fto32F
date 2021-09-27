@@ -1,10 +1,2 @@
-
-dependencies {
-    ['core','generator-annprocess'].each { String a->
-        compile('org.openjdk.jmh:jmh-'+a+':1.27')
-    }
-
-    compile group: 'args4j', name: 'args4j', version: '2.33'
-    compile 'com.sun.mail:javax.mail:1.6.0'
-}
-
+project.uploadArchives.enabled = false
+project.tasks.publish.enabled = false

@@ -1,3 +1,1 @@
-rootProject.name = "auto64fto32f"
-
-include "tools"
+include "tools:autofloat", "tools:autoconcurrent", "tools:language", "tools:regression", "tools:common"

@@ -1,0 +1,14 @@
+
+dependencies {
+    api project(':tools:common')
+
+    ['core','generator-annprocess'].each { String a->
+        compile('org.openjdk.jmh:jmh-'+a+':1.27')
+    }
+
+    compile "args4j:args4j:${project.args4j_version}"
+    compile 'com.sun.mail:javax.mail:1.6.0'
+    compile 'org.apache.commons:commons-lang3:3.7'
+    api group: 'org.yaml', name: 'snakeyaml', version: '1.23'
+}
+
