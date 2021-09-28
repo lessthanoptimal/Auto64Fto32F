@@ -59,7 +59,7 @@ public class RunAllRuntimeBenchmarks extends JmhRunnerBase {
             Collections.shuffle(benchmarkNames);
         }
         for (String benchmarkName : benchmarkNames) {
-            runBenchmark(benchmarkName, false, null);
+            runBenchmark(benchmarkName, null);
         }
     }
 

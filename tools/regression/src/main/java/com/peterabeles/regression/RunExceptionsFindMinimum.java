@@ -130,7 +130,7 @@ public class RunExceptionsFindMinimum extends JmhRunnerBase {
             p.value = words[1];
             parameters.add(p);
         }
-        runBenchmark(benchmarkName, true, parameters);
+        runBenchmark(benchmarkName, parameters);
         return benchmarkName;
     }
 

@@ -117,10 +117,8 @@ public abstract class JmhRunnerBase {
 
     /**
      * Runs the benchmark and saves the results to disk
-     *
-     * @param exact If true it will only run tests which match that name exactly. Good for single runs
      */
-    public void runBenchmark( String benchmarkName, boolean exact, @Nullable List<Parameter> parameters ) {
+    public void runBenchmark( String benchmarkName, @Nullable List<Parameter> parameters ) {
         System.out.println("Running " + benchmarkName);
         // Shorten the name to have it fit on a single line
         String[] words = benchmarkName.split("\\.");
@@ -137,7 +135,9 @@ public abstract class JmhRunnerBase {
             }
         }
 
-        opt.include(exact ? "\\b" + benchmarkName + "\\b" : benchmarkName)
+        // The \b is used to ensure that you just match a single benchmark class. Without it Foo and FooMoo would be
+        // run when you just want to run Foo
+        opt.include("\\b" + benchmarkName + "\\b")
                 // Using average since it seems to have less loss of precision across a range of speeds
                 .mode(Mode.AverageTime)
                 // Using nanoseconds since it seems to have less loss of precision for very fast and slow operations
