@@ -1,8 +1,9 @@
 ------------------------------------------------------------------------------
-Version 2.2
+Version 3.0
 
 - Updated build system
 - Fixed issue where custom ignores were only applied to exact words and not substrings in a word
+- Moved in several new tools for code generation, regression, and compliance
 
 ------------------------------------------------------------------------------
 Version 2.1
