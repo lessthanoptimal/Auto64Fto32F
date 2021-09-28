@@ -122,7 +122,10 @@ public abstract class JmhRunnerBase {
      */
     public void runBenchmark( String benchmarkName, boolean exact, @Nullable List<Parameter> parameters ) {
         System.out.println("Running " + benchmarkName);
-        logRuntimes.printf("%-80s ", benchmarkName.substring(9));
+        // Shorten the name to have it fit on a single line
+        String[] words = benchmarkName.split("\\.");
+        String truncated = words.length >= 2 ? words[words.length-2] + "." + words[words.length-1] : benchmarkName;
+        logRuntimes.printf("%-80s ", truncated);
         logRuntimes.flush();
 
         long time0 = System.currentTimeMillis();
