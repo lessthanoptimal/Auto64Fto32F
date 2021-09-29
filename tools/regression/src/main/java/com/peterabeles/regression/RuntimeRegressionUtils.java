@@ -6,6 +6,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -26,13 +30,14 @@ import static com.peterabeles.ProjectUtils.formatDate;
 public class RuntimeRegressionUtils {
 
     /**
-     * Short summary of system and EJML info
+     * Short summary of system and library info
      */
     public static String createInfoSummaryText() {
-        LibrarySourceInfo info = ProjectUtils.sourceInfo.getSurceInfo();
+        LibrarySourceInfo info = ProjectUtils.libraryInfo;
+        info.checkConfigured();
 
         String text = "";
-        text += "EJML Runtime Regression Baseline\n";
+        text += info.projectName+" Runtime Regression Baseline\n";
         text += "\n";
         text += "Hostname:      " + RuntimeRegressionUtils.getHostName() + "\n";
         text += "Machine Name:  " + SettingsLocal.machineName + "\n";
@@ -50,7 +55,8 @@ public class RuntimeRegressionUtils {
         try {
             PrintStream out = new PrintStream(new File(directory, "SystemInfo.txt"));
 
-            LibrarySourceInfo info = ProjectUtils.sourceInfo.getSurceInfo();
+            LibrarySourceInfo info = ProjectUtils.libraryInfo;
+            info.checkConfigured();
 
             out.println("Hostname:      " + getHostName());
             out.println("Machine Name:  " + SettingsLocal.machineName);

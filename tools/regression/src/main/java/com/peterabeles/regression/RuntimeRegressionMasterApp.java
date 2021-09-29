@@ -6,8 +6,13 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
+import com.peterabeles.LibrarySourceInfo;
 import com.peterabeles.ProjectUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -77,9 +82,9 @@ public class RuntimeRegressionMasterApp {
         var email = new EmailResults();
         email.loadEmailFile(new File(emailPath));
 
-        System.out.println("resultsPath="+resultsPath);
-        System.out.println("emailPath="+emailPath);
-        System.out.println("localSettingsPath="+localSettingsPath);
+        System.out.println("resultsPath=" + resultsPath);
+        System.out.println("emailPath=" + emailPath);
+        System.out.println("localSettingsPath=" + localSettingsPath);
 
         // Little bit of a hack, but if we want to just run the minimum search then this is the easiest way to do it
         if (doMinimumOnly)
@@ -150,9 +155,9 @@ public class RuntimeRegressionMasterApp {
         logStderr = null;
     }
 
-    private Map<String, Double> getCurrentResults( File currentResultsDir,
-                                                   File currentJmhDir,
-                                                   Map<String, Double> baselineResults ) throws IOException {
+    private Map<String, Double> getCurrentResults(File currentResultsDir,
+                                                  File currentJmhDir,
+                                                  Map<String, Double> baselineResults) throws IOException {
         Map<String, Double> currentResults;
         if (doMinimumOnly || !doSummaryOnly) {
             // Load JMH results
@@ -171,7 +176,7 @@ public class RuntimeRegressionMasterApp {
         return currentResults;
     }
 
-    private void createBaseline(EmailResults email, File baselineDir, boolean update ) {
+    private void createBaseline(EmailResults email, File baselineDir, boolean update) {
         if (!update) {
             System.out.println("\n\n************* WARNING: Creating Baseline *************\n\n");
             // Pause before we start to give the user a chance to abort before potentially sucking up
@@ -198,11 +203,13 @@ public class RuntimeRegressionMasterApp {
 
         // Compute how long it took
         long elapsedTimeMS = System.currentTimeMillis() - time0;
-        double hrs = elapsedTimeMS/(double)(1000*60*60);
+        double hrs = elapsedTimeMS / (double) (1000 * 60 * 60);
         System.out.println("Elapsed Time: " + hrs + " hrs");
 
         if (email.emailDestination != null) {
-            email.send("EJML Runtime Regression: Initialized",
+            LibrarySourceInfo info = ProjectUtils.libraryInfo;
+            info.checkConfigured();
+            email.send(info.projectName + " Runtime Regression: Initialized",
                     RuntimeRegressionUtils.createInfoSummaryText() +
                             String.format("\n\nElapsed Time %.2f hrs\n\n", hrs));
         }
@@ -211,7 +218,7 @@ public class RuntimeRegressionMasterApp {
     /**
      * If available, load the summary results
      */
-    private static Map<String, Double> checkLoadAllBenchmarks( File directory ) {
+    private static Map<String, Double> checkLoadAllBenchmarks(File directory) {
         File file = new File(directory, ALL_BENCHMARKS_FILE);
         if (!file.exists())
             return new HashMap<>();
@@ -222,9 +229,9 @@ public class RuntimeRegressionMasterApp {
     /**
      * Re-reun regression tests to see if they are false positives
      */
-    private void rerunFailedRegressionTests( File currentResultsDir,
-                                             Map<String, Double> currentResults,
-                                             Map<String, Double> baselineResults ) {
+    private void rerunFailedRegressionTests(File currentResultsDir,
+                                            Map<String, Double> currentResults,
+                                            Map<String, Double> baselineResults) {
         Set<String> exceptions = RuntimeRegressionUtils.findRuntimeExceptions(
                 baselineResults, currentResults, significantFractionTol);
 
@@ -246,7 +253,7 @@ public class RuntimeRegressionMasterApp {
     }
 
     private void createSummary(EmailResults email, File currentDirectory,
-                               Map<String, Double> current, Map<String, Double> baseline, long elapsedTime ) {
+                               Map<String, Double> current, Map<String, Double> baseline, long elapsedTime) {
         // Compare the benchmark results and summarize
         var summary = new RuntimeRegressionSummary();
         summary.significantFractionTol = significantFractionTol;
@@ -300,7 +307,7 @@ public class RuntimeRegressionMasterApp {
         return selected;
     }
 
-    public static void main( String[] args ) {
+    public static void main(String[] args) {
         var regression = new RuntimeRegressionMasterApp();
         var parser = new CmdLineParser(regression);
 

@@ -6,6 +6,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles;
 
 import java.io.File;
@@ -38,11 +42,9 @@ public class ProjectUtils {
     public static ProjectRoot checkRoot = (f) -> new File(".gitignore").exists();
 
     /**
-     * Used to retrieve information about the source code
+     * Provides information about the library. Must be configured.
      */
-    public static SourceInfo sourceInfo = () -> {
-        throw new RuntimeException("Must specify source");
-    };
+    public static final LibrarySourceInfo libraryInfo = new LibrarySourceInfo();
 
     public static String findPathToProjectRoot() {
         String path = "./";
@@ -85,11 +87,6 @@ public class ProjectUtils {
     @FunctionalInterface
     public interface ProjectRoot {
         boolean isRootDir(File file);
-    }
-
-    @FunctionalInterface
-    public interface SourceInfo {
-        LibrarySourceInfo getSurceInfo();
     }
 
     @FunctionalInterface
