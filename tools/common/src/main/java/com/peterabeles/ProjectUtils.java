@@ -1,3 +1,11 @@
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles;
 
 import java.io.File;
