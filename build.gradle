@@ -2,6 +2,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 ext.libpath = file('./').absolutePath
 
 allprojects {
@@ -10,7 +14,7 @@ allprojects {
     apply plugin: 'signing'
 
     group = 'com.peterabeles'
-    version = '3.1-SNAPSHOT'
+    version = '3.1.0'
 
     java {
         withJavadocJar()

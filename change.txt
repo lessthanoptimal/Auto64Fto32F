@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
-Version 3.1
+Version 3.1.0
 
 - Project info is no longer retrieved using a lambda
 - Removed hard coded project name
