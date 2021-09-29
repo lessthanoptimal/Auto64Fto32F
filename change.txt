@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+Version 3.1
+
+- Project info is no longer retrieved using a lambda
+- Removed hard coded project name
+- Fixed bug when parsing benchmark results with no parameters
+
+------------------------------------------------------------------------------
 Version 3.0
 
 - Updated build system

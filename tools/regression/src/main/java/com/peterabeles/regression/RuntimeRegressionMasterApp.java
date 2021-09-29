@@ -10,6 +10,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -172,6 +176,9 @@ public class RuntimeRegressionMasterApp {
         } else {
             // Load previously saved results
             currentResults = checkLoadAllBenchmarks(currentResultsDir);
+            if (currentResults.isEmpty()) {
+                throw new RuntimeException("Unable to load or find current "+ALL_BENCHMARKS_FILE);
+            }
         }
         return currentResults;
     }

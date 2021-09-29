@@ -10,6 +10,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -37,7 +41,7 @@ public class RuntimeRegressionUtils {
         info.checkConfigured();
 
         String text = "";
-        text += info.projectName+" Runtime Regression Baseline\n";
+        text += info.projectName + " Runtime Regression Baseline\n";
         text += "\n";
         text += "Hostname:      " + RuntimeRegressionUtils.getHostName() + "\n";
         text += "Machine Name:  " + SettingsLocal.machineName + "\n";
@@ -123,9 +127,13 @@ public class RuntimeRegressionUtils {
             File f = children[i];
             if (!f.isFile() || !f.getName().endsWith(".csv"))
                 continue;
-            parser.parse(new FileInputStream(f));
-            for (ParseBenchmarkCsv.Result r : parser.results) {
-                results.put(r.getKey(), r.getMilliSecondsPerOp());
+            try {
+                parser.parse(new FileInputStream(f));
+                for (ParseBenchmarkCsv.Result r : parser.results) {
+                    results.put(r.getKey(), r.getMilliSecondsPerOp());
+                }
+            } catch (IOException e) {
+                throw new IOException("Exception parsing " + f.getPath(), e);
             }
         }
 

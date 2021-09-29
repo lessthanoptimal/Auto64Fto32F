@@ -6,6 +6,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.ProjectUtils;
@@ -54,7 +58,7 @@ public class ParseBenchmarkCsv {
         int indexFirstParam = findFirstParameterIndex();
         List<String> parameters = new ArrayList<>();
         for (int i = indexFirstParam; i < columns.size(); i++) {
-            parameters.add(columns.get(i).split(" ")[1].replace("\"",""));
+            parameters.add(columns.get(i).split(" ")[1]);
         }
 
         while (input.available() != 0) {
@@ -114,12 +118,13 @@ public class ParseBenchmarkCsv {
     /**
      * Finds the first column that describes the parameters used in this benchmark
      */
-    private int findFirstParameterIndex() throws IOException {
+    private int findFirstParameterIndex() {
         for (int i = 0; i < columns.size(); i++) {
             if (columns.get(i).startsWith("Param: "))
                 return i;
         }
-        throw new IOException("Couldn't find a parameter");
+        // There are no parameters
+        return columns.size();
     }
 
     private void parseColumnTypes( InputStream input ) throws IOException {
@@ -138,7 +143,10 @@ public class ParseBenchmarkCsv {
 
     /** Removes the first and last character in the string */
     private static String stripQuotes( String word ) {
-        return word.substring(1, word.length() - 1);
+        int end = word.length()-1;
+        while (word.charAt(end) != '"')
+            end -= 1;
+        return word.substring(1, end);
     }
 
     /** Storage for parsed results */

@@ -10,6 +10,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -133,6 +137,10 @@ public class RuntimeRegressionSummary {
     public String createSummary() {
         LibrarySourceInfo info = ProjectUtils.libraryInfo;
         info.checkConfigured();
+
+        if (allErrors.length == 0) {
+            throw new RuntimeException("allErrors is empty. This must be a bug");
+        }
 
         String summary = "";
         summary += info.projectName + " Runtime Regression\n\n";
