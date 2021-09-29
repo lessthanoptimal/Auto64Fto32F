@@ -55,18 +55,21 @@ public class CreateRuntimeRegressionBaseline {
     /**
      * How long it took to run all the benchmarks in hours
      */
-    private @Getter double timeBenchmarkHrs;
+    private @Getter
+    double timeBenchmarkHrs;
     /**
      * How long it took to combine all the results in milliseconds
      */
-    private @Getter double timeCombineMS;
+    private @Getter
+    double timeCombineMS;
 
     public final RunAllRuntimeBenchmarks benchmark = new RunAllRuntimeBenchmarks();
 
     /**
      * Given the name give it the new results
      */
-    @Getter private final Map<String, Double> nameToResults = new HashMap<>();
+    @Getter
+    private final Map<String, Double> nameToResults = new HashMap<>();
 
     /**
      * Converts the path to be relative to the project's root
@@ -98,11 +101,15 @@ public class CreateRuntimeRegressionBaseline {
             // Compute all the results. This will take a while
             if (!combineOnly) {
                 for (int trial = 0; trial < maxIterations; trial++) {
+                    long timeTrialStart = System.currentTimeMillis();
                     // Save the start time of each trial
-                    logTiming.printf("trial%-2d  %s\n", trial, ProjectUtils.formatDate(new Date()));
+                    logTiming.printf("trial%-2d  %s", trial, ProjectUtils.formatDate(new Date()));
                     logTiming.flush();
                     benchmark.outputRelativePath = outputRelativePath + "/" + "trial" + trial;
                     benchmark.process();
+                    double elapsedHrs = (System.currentTimeMillis() - timeTrialStart) / (1000.0 * 60 * 60);
+                    logTiming.printf(", %5.1f hrs\n", elapsedHrs);
+                    logTiming.flush();
                     System.out.print("\n\nFinished Trial " + trial + "\n\n");
                 }
             }
