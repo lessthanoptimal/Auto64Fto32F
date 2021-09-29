@@ -14,6 +14,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -90,9 +94,11 @@ public class RuntimeRegressionSummary {
 
         // Go through each benchmark and compare the results
         for (String name : baseline.keySet()) {
+            String shortName = shortenName(name);
+
             if (!current.containsKey(name)) {
                 identical = false;
-                exceptions.add("Not in current: " + name);
+                exceptions.add("Not in current: " + shortName);
                 continue;
             }
 
@@ -101,7 +107,7 @@ public class RuntimeRegressionSummary {
 
             // Can't be negative or zero.
             if (b <= 0.0 || c <= 0.0) {
-                exceptions.add("Impossible result: b=" + b + " c=" + c + " in " + name);
+                exceptions.add("Impossible result: b=" + b + " c=" + c + " in " + shortName);
                 continue;
             }
 
@@ -109,7 +115,7 @@ public class RuntimeRegressionSummary {
             allErrors.add(fractionalError);
 
             if (fractionalError > significantFractionTol) {
-                String message = String.format("%-5.1f%% %s", 100.0 * c / b, name);
+                String message = String.format("%-5.1f%% %s", 100.0 * c / b, shortName);
                 if (c > b) {
                     degraded.add(message);
                 } else {
@@ -196,5 +202,16 @@ public class RuntimeRegressionSummary {
             }
         }
         return summary;
+    }
+
+    /** Make the name more compact so it's easier for a human to read */
+    private static String shortenName(String original) {
+        String[] words = original.split("\\.");
+        int index0 = Math.max(0, words.length-3);
+        String truncated = words[index0];
+        for (int i = index0+1; i < words.length; i++) {
+            truncated += "." + words[i];
+        }
+        return truncated;
     }
 }

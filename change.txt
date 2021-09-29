@@ -5,6 +5,7 @@ Version 3.1
 - Removed hard coded project name
 - Fixed bug when parsing benchmark results with no parameters
 - regression sends an e-mail out if an exception is thrown instead of silently failing
+- Benchmark names in summary are truncated
 
 ------------------------------------------------------------------------------
 Version 3.0
