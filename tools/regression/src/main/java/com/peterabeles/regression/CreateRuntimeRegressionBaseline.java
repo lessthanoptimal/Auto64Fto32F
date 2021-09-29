@@ -6,15 +6,16 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.ProjectUtils;
 import lombok.Getter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,8 +123,8 @@ public class CreateRuntimeRegressionBaseline {
             logTiming.printf("Combine:     %.2f ms\n", timeCombineMS);
             logTiming.println();
             logTiming.println("Finished:    " + ProjectUtils.formatDate(new Date()));
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         } finally {
             logTiming.close();
         }
@@ -136,6 +137,7 @@ public class CreateRuntimeRegressionBaseline {
 
         System.out.println("Matching directories=" + directories.length);
 
+        nameToResults.clear();
         for (int idx = 0; idx < directories.length; idx++) {
             File trialDir = new File(homeDirectory, directories[idx]);
             Map<String, Double> results = RuntimeRegressionUtils.loadJmhResults(trialDir);

@@ -4,6 +4,7 @@ Version 3.1
 - Project info is no longer retrieved using a lambda
 - Removed hard coded project name
 - Fixed bug when parsing benchmark results with no parameters
+- regression sends an e-mail out if an exception is thrown instead of silently failing
 
 ------------------------------------------------------------------------------
 Version 3.0

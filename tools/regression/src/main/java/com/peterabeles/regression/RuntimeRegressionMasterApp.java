@@ -14,6 +14,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+/*
+ * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
+ */
+
 package com.peterabeles.regression;
 
 import com.peterabeles.LibrarySourceInfo;
@@ -94,6 +98,7 @@ public class RuntimeRegressionMasterApp {
         if (doMinimumOnly)
             doSummaryOnly = true;
 
+        File currentResultsDir = null;
         try {
             // Load local settings
             SettingsLocal.loadStdErrIfFail(new File(localSettingsPath));
@@ -112,9 +117,7 @@ public class RuntimeRegressionMasterApp {
                 return;
             }
 
-            // Ether load previous results or create a new set of runtime results
-            File currentResultsDir;
-
+            // Either load previous results or create a new set of runtime results
             if (doSummaryOnly) {
                 currentResultsDir = selectMostRecentResults();
                 // Not creating new results, so we don't want to overwrite the old error log
@@ -152,6 +155,8 @@ public class RuntimeRegressionMasterApp {
                     System.currentTimeMillis() - startTime);
         } catch (Exception e) {
             e.printStackTrace(logStderr == null ? System.err : logStderr);
+            System.err.println("Logged exception: " + e.getMessage());
+            sendFailureEmail(email, currentResultsDir == null ? new File(resultsPath) : currentResultsDir, e);
         } finally {
             if (logStderr != null) logStderr.close();
         }
@@ -177,7 +182,7 @@ public class RuntimeRegressionMasterApp {
             // Load previously saved results
             currentResults = checkLoadAllBenchmarks(currentResultsDir);
             if (currentResults.isEmpty()) {
-                throw new RuntimeException("Unable to load or find current "+ALL_BENCHMARKS_FILE);
+                throw new RuntimeException("Unable to load or find current " + ALL_BENCHMARKS_FILE);
             }
         }
         return currentResults;
@@ -269,13 +274,32 @@ public class RuntimeRegressionMasterApp {
         summary.process(current, baseline);
 
         // Log results
-        String subject = String.format("Runtime Regression: Degraded %3d Improved %d Exceptions %3d",
+        String projectName = ProjectUtils.libraryInfo.projectName;
+        String subject = String.format(projectName + " Runtime Regression: Degraded %3d Improved %d Exceptions %3d",
                 summary.getDegraded().size(),
                 summary.getImproved().size(),
                 summary.getExceptions().size());
 
         String text = summary.createSummary();
 
+        sendEmail(email, currentDirectory, subject, text);
+    }
+
+    private void sendFailureEmail(EmailResults email, File currentDirectory, Exception exception) {
+        String projectName = ProjectUtils.libraryInfo.projectName;
+        String subject = projectName + " Runtime Regression: Fatal Error";
+
+        // Include the exception in the e-mail
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bout);
+        exception.printStackTrace(out);
+        out.flush();
+        String text = bout.toString();
+
+        sendEmail(email, currentDirectory, subject, text);
+    }
+
+    private void sendEmail(EmailResults email, File currentDirectory, String subject, String text) {
         if (email.emailDestination != null) {
             email.send(subject, text);
         }
@@ -326,6 +350,7 @@ public class RuntimeRegressionMasterApp {
             return;
         }
 
+        ProjectUtils.libraryInfo.checkConfigured();
         regression.performRegression();
     }
 }
