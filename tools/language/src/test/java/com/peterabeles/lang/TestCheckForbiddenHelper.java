@@ -2,19 +2,11 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
-/*
- * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
- */
-
-/*
- * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
- */
-
 package com.peterabeles.lang;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Peter Abeles

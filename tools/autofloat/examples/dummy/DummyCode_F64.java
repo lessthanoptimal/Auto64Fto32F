@@ -2,10 +2,6 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
-/*
- * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
- */
-
 package dummy;
 
 //CUSTOM ignore Box3D_F64
