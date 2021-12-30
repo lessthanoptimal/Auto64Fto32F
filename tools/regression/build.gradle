@@ -6,9 +6,9 @@ dependencies {
         compile('org.openjdk.jmh:jmh-'+a+':1.27')
     }
 
-    compile "args4j:args4j:${project.args4j_version}"
-    compile 'com.sun.mail:javax.mail:1.6.0'
-    compile 'org.apache.commons:commons-lang3:3.7'
-    api group: 'org.yaml', name: 'snakeyaml', version: '1.23'
+    api "args4j:args4j:${project.args4j_version}"
+    api 'com.sun.mail:javax.mail:1.6.0'
+    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: snakeyaml_version
 }
 
