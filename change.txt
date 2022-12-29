@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+Version 3.1.2
+
+- Updated build system
+- Updated dependencies
+- Change "api" to "implementation" to avoid adding a transitive dependency that needs to be excluded
+
+------------------------------------------------------------------------------
 Version 3.1.0
 
 - Project info is no longer retrieved using a lambda

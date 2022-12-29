@@ -3,12 +3,12 @@ dependencies {
     api project(':tools:common')
 
     ['core','generator-annprocess'].each { String a->
-        compile('org.openjdk.jmh:jmh-'+a+':1.27')
+        implementation("org.openjdk.jmh:jmh-$a:$jmh_version")
     }
 
-    api "args4j:args4j:${project.args4j_version}"
-    api 'com.sun.mail:javax.mail:1.6.0'
-    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation "args4j:args4j:${project.args4j_version}"
+    implementation "com.sun.mail:javax.mail:1.6.0"
+    implementation "org.apache.commons:commons-lang3:3.7"
     implementation group: 'org.yaml', name: 'snakeyaml', version: snakeyaml_version
 }
 
