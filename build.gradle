@@ -16,7 +16,7 @@ project.ext.jmh_version = '1.36'
 
 allprojects {
     group = 'com.peterabeles'
-    version = '3.1.2'
+    version = '3.2.0-SNAPSHOT'
 }
 
 subprojects {

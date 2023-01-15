@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+Version 3.2.0
+
+- Language
+  * Tokenizer will break up non-identifier characters into operators
+  * var with typecast can optionally be allowed
+
+------------------------------------------------------------------------------
 Version 3.1.2
 
 - Updated build system

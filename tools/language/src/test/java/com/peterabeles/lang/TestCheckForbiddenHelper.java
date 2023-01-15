@@ -6,7 +6,7 @@ package com.peterabeles.lang;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Peter Abeles
@@ -35,7 +35,7 @@ public class TestCheckForbiddenHelper {
 
 	@Test void forbidNonExplicitVar() {
 		var alg = new CheckForbiddenLanguage();
-		CheckForbiddenHelper.forbidNonExplicitVar(alg, false);
+		CheckForbiddenHelper.forbidNonExplicitVar(alg, false, false);
 
 		assertTrue(alg.process("var a = new Foo()"));
 		assertTrue(alg.process("var a =new Foo()"));
@@ -61,6 +61,7 @@ public class TestCheckForbiddenHelper {
 		assertFalse(alg.process("var a=new Moo();var a=moo.foo()"));
 		assertFalse(alg.process("dude = moo;var a = moo.foo()"));
 		assertFalse(alg.process("var b=new Moo();var a = moo.foo()"));
+		assertFalse(alg.process("var a= (int)moo.foo();var b = (Bar)199;"));
 		assertEquals(1, alg.getFailures().size());
 		assertEquals(1, alg.getFailures().get(0).line);
 		assertEquals("var", alg.getFailures().get(0).check.keyword);
@@ -73,10 +74,25 @@ public class TestCheckForbiddenHelper {
 
 	@Test void forbidNonExplicitVar_allowForEach() {
 		var alg = new CheckForbiddenLanguage();
-		CheckForbiddenHelper.forbidNonExplicitVar(alg, true);
+		CheckForbiddenHelper.forbidNonExplicitVar(alg, true, false);
 
 		assertTrue(alg.process("for( var a : list )"));
 		assertTrue(alg.process("for ( var a : list )"));
+	}
+
+	@Test void forbidNonExplicitVar_allowTypeCast() {
+		var alg = new CheckForbiddenLanguage();
+		CheckForbiddenHelper.forbidNonExplicitVar(alg, false, true);
+
+		assertTrue(alg.process("var a= ( int ) moo.foo();"));
+		assertTrue(alg.process("var a= ( int)moo.foo();"));
+		assertTrue(alg.process("var a=(int) moo.foo();"));
+		assertTrue(alg.process("var a =(int)moo.foo();"));
+		assertTrue(alg.process("var a= (int)moo.foo();"));
+
+		assertTrue(alg.process("var a= (int[])moo.foo();"));
+		assertTrue(alg.process("var a= (int  [ ] )moo.foo();"));
+
 	}
 
 	@Test void forbidForEach() {
