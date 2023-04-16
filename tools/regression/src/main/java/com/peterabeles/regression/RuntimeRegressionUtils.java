@@ -103,8 +103,8 @@ public class RuntimeRegressionUtils {
     /**
      * Loads all the JMH results in a directory and puts it into a map.
      */
-    public static Map<String, Double> loadJmhResults(File directory) throws IOException {
-        Map<String, Double> results = new HashMap<>();
+    public static Map<String, Double> loadJmhResults(File directory, PrintStream err) {
+        var results = new HashMap<String, Double>();
         var parser = new ParseBenchmarkCsv();
 
         File[] children = directory.listFiles();
@@ -115,13 +115,15 @@ public class RuntimeRegressionUtils {
             File f = children[i];
             if (!f.isFile() || !f.getName().endsWith(".csv"))
                 continue;
-            try {
-                parser.parse(new FileInputStream(f));
+            try (var input = new FileInputStream(f)) {
+                parser.parse(input);
                 for (ParseBenchmarkCsv.Result r : parser.results) {
                     results.put(r.getKey(), r.getMilliSecondsPerOp());
                 }
             } catch (IOException e) {
-                throw new IOException("Exception parsing " + f.getPath(), e);
+                // Skip over and log the error if this file is bad
+                err.println("Exception parsing " + f.getPath());
+                e.printStackTrace(err);
             }
         }
 

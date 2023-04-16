@@ -64,7 +64,7 @@ public class RuntimeRegressionMasterApp {
     public double significantFractionTol = 0.2;
 
     // Log error messages
-    protected PrintStream logStderr;
+    protected PrintStream logStderr = System.err;
 
     public void performRegression() {
         long startTime = System.currentTimeMillis();
@@ -138,7 +138,7 @@ public class RuntimeRegressionMasterApp {
             createSummary(email, currentResultsDir, currentResults, baselineResults,
                     System.currentTimeMillis() - startTime);
         } catch (Exception e) {
-            e.printStackTrace(logStderr == null ? System.err : logStderr);
+            e.printStackTrace(logStderr);
             System.err.println("Logged exception: " + e.getMessage());
             sendFailureEmail(email, currentResultsDir == null ? new File(resultsPath) : currentResultsDir, e);
         } finally {
@@ -150,11 +150,11 @@ public class RuntimeRegressionMasterApp {
 
     private Map<String, Double> getCurrentResults(File currentResultsDir,
                                                   File currentJmhDir,
-                                                  Map<String, Double> baselineResults) throws IOException {
+                                                  Map<String, Double> baselineResults) {
         Map<String, Double> currentResults;
         if (doMinimumOnly || !doSummaryOnly) {
             // Load JMH results
-            currentResults = RuntimeRegressionUtils.loadJmhResults(currentJmhDir);
+            currentResults = RuntimeRegressionUtils.loadJmhResults(currentJmhDir, System.err);
 
             // find exceptions and re-run them to see if they are false positives
             rerunFailedRegressionTests(currentResultsDir, currentResults, baselineResults);
@@ -193,6 +193,7 @@ public class RuntimeRegressionMasterApp {
         createBaseline.maxIterations = maxIterations;
         createBaseline.benchmark.timeoutMin = timeoutMin;
         createBaseline.benchmark.userBenchmarkNames = benchmarkNames;
+        createBaseline.logStderr = logStderr;
 
         // Create the baseline
         createBaseline.process();

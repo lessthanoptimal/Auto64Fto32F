@@ -7,7 +7,9 @@ package com.peterabeles.regression;
 import com.peterabeles.ProjectUtils;
 import lombok.Getter;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +63,8 @@ public class CreateRuntimeRegressionBaseline {
 
     protected PrintStream logTiming;
 
+    public PrintStream logStderr = System.err;
+
     /**
      * Runs the benchmark set several times, finds the best times for each benchmark, save results
      */
@@ -71,12 +75,10 @@ public class CreateRuntimeRegressionBaseline {
         final File homeDirectory = new File(convertPath.convert(outputRelativePath));
         if (!homeDirectory.exists()) {
             if (!homeDirectory.mkdirs())
-                System.err.println("Can't create home directory. " + homeDirectory.getPath());
+                logStderr.println("Can't create home directory. " + homeDirectory.getPath());
         }
 
-        try {
-            logTiming = new PrintStream(new FileOutputStream(new File(homeDirectory, "time.txt")));
-
+        try (var logTiming = new PrintStream(new FileOutputStream(new File(homeDirectory, "time.txt")))) {
             // Save info about what is being computed
             RuntimeRegressionUtils.saveSystemInfo(homeDirectory, System.out);
 
@@ -115,14 +117,13 @@ public class CreateRuntimeRegressionBaseline {
             logTiming.printf("Combine:     %.2f ms\n", timeCombineMS);
             logTiming.println();
             logTiming.println("Finished:    " + ProjectUtils.formatDate(new Date()));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            logTiming.close();
+        } catch (Exception e) {
+            e.printStackTrace(logStderr);
+            throw new RuntimeException(e);
         }
     }
 
-    private void combineTrialResults(File homeDirectory) throws IOException {
+    private void combineTrialResults(File homeDirectory) {
         // List of all directories containing the results
         String[] directories = homeDirectory.list((current, name) ->
                 new File(current, name).isDirectory() && name.startsWith("trial"));
@@ -132,7 +133,7 @@ public class CreateRuntimeRegressionBaseline {
         nameToResults.clear();
         for (int idx = 0; idx < directories.length; idx++) {
             File trialDir = new File(homeDirectory, directories[idx]);
-            Map<String, Double> results = RuntimeRegressionUtils.loadJmhResults(trialDir);
+            Map<String, Double> results = RuntimeRegressionUtils.loadJmhResults(trialDir, logStderr);
             for (var e : results.entrySet()) {
                 if (nameToResults.containsKey(e.getKey())) {
                     double current = nameToResults.get(e.getKey());
