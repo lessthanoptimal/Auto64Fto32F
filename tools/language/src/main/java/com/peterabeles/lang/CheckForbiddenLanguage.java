@@ -115,6 +115,10 @@ public class CheckForbiddenLanguage {
             boolean incrementLine = false;
             char c = sourceCode.charAt(idx);
 
+            // Handle windows formatted files with \r\n new lines by ignoring the \n
+            if (prev == '\r' && c == '\n')
+                continue;
+
             switch (mode) {
                 case CODE -> {
                     // Find all the code until the end of the line or a comment is encountered
@@ -125,7 +129,7 @@ public class CheckForbiddenLanguage {
                         mode = Mode.LINE_COMMENT;
                         codeIdx1 = idx - 1;
                     } else if (isNewLine(c)) {
-                        incrementLine = shouldIncrementLine(prev, c);
+                        incrementLine = true;
                         codeIdx1 = idx - 1;
                     }
                     if (codeIdx1 > codeIdx0) {
@@ -139,7 +143,7 @@ public class CheckForbiddenLanguage {
                         checkCommentForCommands(sourceCode, codeIdx1, idx);
                         if (disabled)
                             return true;
-                        incrementLine = shouldIncrementLine(prev, c);
+                        incrementLine = true;
                         codeIdx0 = idx + 1;
                         mode = Mode.CODE;
                     }
@@ -147,7 +151,7 @@ public class CheckForbiddenLanguage {
 
                 case MULTI_LINE_COMMENT -> {
                     if (isNewLine(c)) {
-                        incrementLine = shouldIncrementLine(prev, c);
+                        incrementLine = true;
                     } else if (c == '/' && prev == '*') {
                         codeIdx0 = idx + 1;
                         mode = Mode.CODE;
@@ -190,10 +194,6 @@ public class CheckForbiddenLanguage {
         else
             // there must have been a /**/ comment in the middle. Join together and skip
             lineOfCode = lineOfCode + " " + sourceCode.substring(codeIdx0, codeIdx1);
-    }
-
-    private boolean shouldIncrementLine(char prev, char c) {
-        return !(c == '\r' && prev == '\n');
     }
 
     private boolean isNewLine(char c) {

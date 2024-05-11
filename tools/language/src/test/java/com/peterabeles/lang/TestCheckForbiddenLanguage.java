@@ -8,13 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * @author Peter Abeles
- */
 public class TestCheckForbiddenLanguage {
-
-    @Test
-    void disableAll() {
+    @Test void disableAll() {
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.DISABLE_ALL;
         String comment = "//" + D + " " + L;
@@ -25,8 +20,7 @@ public class TestCheckForbiddenLanguage {
         assertTrue(alg.process(comment + "\n\n 1\nfoo.forbidden()"));
     }
 
-    @Test
-    void disableCheck() {
+    @Test void disableCheck() {
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.DISABLE_CHECK;
         String comment = "//" + D + " " + L + " function_forbidden";
@@ -38,8 +32,7 @@ public class TestCheckForbiddenLanguage {
         assertFalse(alg.process("foo.forbidden()\n" + comment + "\n\n 1\nfoo.forbidden()"));
     }
 
-    @Test
-    void disableCheck_DoesNotExist() {
+    @Test void disableCheck_DoesNotExist() {
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.DISABLE_CHECK;
         String comment = "//" + D + " " + L + " function_yolo";
@@ -51,8 +44,7 @@ public class TestCheckForbiddenLanguage {
         assertSame(CheckForbiddenLanguage.MALFORMED_COMMAND, alg.getFailures().get(0).check);
     }
 
-    @Test
-    void ignoreBelow() {
+    @Test void ignoreBelow() {
         // create a simple shorthand because of how verbose it would be otherwise
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.IGNORE_BELOW;
@@ -81,8 +73,7 @@ public class TestCheckForbiddenLanguage {
     /**
      * If the ignore statement is badly formatted it should be an error
      */
-    @Test
-    void ignoreBelow_bad_number() {
+    @Test void ignoreBelow_bad_number() {
         // create a simple shorthand because of how verbose it would be otherwise
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.IGNORE_BELOW;
@@ -96,12 +87,10 @@ public class TestCheckForbiddenLanguage {
         assertEquals(2, alg.getFailures().get(1).line);
     }
 
-
     /**
      * If there's a disable comment AND there is nothing to disable, that should be an error too
      */
-    @Test
-    void ignoreBelow_error_if_no_error() {
+    @Test void ignoreBelow_error_if_no_error() {
         // create a simple shorthand because of how verbose it would be otherwise
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.IGNORE_BELOW;
@@ -112,8 +101,7 @@ public class TestCheckForbiddenLanguage {
         assertFalse(alg.process(comment + " 1\n\n\n"));
     }
 
-    @Test
-    void ignoreLine() {
+    @Test void ignoreLine() {
         // create a simple shorthand because of how verbose it would be otherwise
         String D = CheckForbiddenLanguage.DEFAULT_IDENTIFIER;
         String L = CheckForbiddenLanguage.IGNORE_LINE;
@@ -134,11 +122,44 @@ public class TestCheckForbiddenLanguage {
     /**
      * If there's a multi line comment in the middle of a line it is removed and converted into a space
      */
-    @Test
-    void multiLineCommentConvertedToSpace() {
+    @Test void multiLineCommentConvertedToSpace() {
         var alg = new CheckForbiddenLanguage();
         CheckForbiddenHelper.addForbiddenFunction(alg, "forbidden", "Because");
 
         assertFalse(alg.process("foo./*asdf*/forbidden()"));
+    }
+
+    @Test void lineNumber() {
+        // Realistic file test
+        String text = """
+                /*
+                 * Copyright (c) 2024.
+                 */
+                                
+                package ninox360.inspector.database;
+                                
+                import lombok.Getter;
+                import lombok.Setter;
+                import org.ddogleg.struct.DogArray;
+                                
+                import java.io.File;
+                import java.io.IOException;
+                import java.io.InputStream;
+                import java.io.PrintStream;
+                import java.util.ArrayList;
+                import java.util.List;
+                                
+                /**
+                 * Foobar
+                 */
+                public class ASDASDASD {
+                """;
+        var alg = new CheckForbiddenLanguage();
+        assertTrue(alg.process(text));
+        assertEquals(21, alg.lineNumber - 1);
+
+        // test windows formatting
+        assertTrue(alg.process("\r\n\r\n"));
+        assertEquals(2, alg.lineNumber - 1);
     }
 }
