@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------------
+Version 3.2.2
+
+- Language
+  * ignore_below defaults to one line
+  * ignore_below reports an error if number isn't a number
+
+------------------------------------------------------------------------------
 Version 3.2.1
 
 - Updated SnakeYaml
