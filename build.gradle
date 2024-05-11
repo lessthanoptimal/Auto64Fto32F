@@ -4,18 +4,18 @@
 
 ext.libpath = file('./').absolutePath
 
-project.ext.lombok_version = '1.18.24'
+project.ext.lombok_version = '1.18.26'
 project.ext.jabel_version = '1.0.0'
 project.ext.guava_version = '31.1-jre'
 project.ext.args4j_version = '2.33'
 project.ext.junit_version = '5.9.1'
-project.ext.commons_io_version = '2.11.0'
-project.ext.snakeyaml_version = '2.0'
+project.ext.commons_io_version = '2.13.0'
+project.ext.snakeyaml_version = '2.2'
 project.ext.jmh_version = '1.36'
 
 allprojects {
     group = 'com.peterabeles'
-    version = '3.2.1'
+    version = '3.2.2-SNAPSHOT'
 }
 
 subprojects {
@@ -128,13 +128,13 @@ subprojects {
         }
     }
 
-    if (ext.ossrhPassword != "dummy") {
+    if (ossrhPassword != "dummy") {
         signing { sign publishing.publications.mavenJava }
     }
 }
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '7.3.3'
+    gradleVersion = '7.6.4'
 }
 
