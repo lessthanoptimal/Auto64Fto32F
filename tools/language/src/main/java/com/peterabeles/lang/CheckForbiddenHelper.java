@@ -33,7 +33,7 @@ public class CheckForbiddenHelper {
      * A simple check that sees if var is only used when the type is shown via "new". There are ways to trick this
      * function into thinking the type is explicitly shown when it is not.
      *
-     * @param allowForEach  If true then var inside of for each loops will be allowed
+     * @param allowForEach  If true then var inside for-each loops is allowed
      * @param allowTypeCast If a type cast appears right next to equals then allow
      */
     public static void forbidNonExplicitVar(CheckForbiddenLanguage checker, boolean allowForEach, boolean allowTypeCast) {
@@ -66,7 +66,7 @@ public class CheckForbiddenHelper {
             return true;
         };
         checker.addConditional("explicit_var", "var",
-                "Auto type inference with var reduces code readability, maintainability, and hide mistakes during refactoring", rule);
+                "Auto type inference with var reduces code readability, maintainability, and hides mistakes during refactoring", rule);
     }
 
     /**
