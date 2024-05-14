@@ -4,6 +4,8 @@ Version 3.2.2
 - Language
   * ignore_below defaults to one line
   * ignore_below reports an error if number isn't a number
+  * var check can now handle type cast with full path
+  * Fixed issues dealing with new lines on Windows
 
 ------------------------------------------------------------------------------
 Version 3.2.1
