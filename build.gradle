@@ -37,9 +37,6 @@ subprojects {
         options.release = 11
     }
 
-    // Enable incremental compile. Should make single file changes faster
-    tasks.withType(JavaCompile) { options.incremental = true }
-
     repositories {
         mavenCentral()
         mavenLocal()
