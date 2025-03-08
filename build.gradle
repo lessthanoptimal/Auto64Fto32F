@@ -4,18 +4,18 @@
 
 ext.libpath = file('./').absolutePath
 
-project.ext.lombok_version = '1.18.26'
-project.ext.jabel_version = '1.0.0'
-project.ext.guava_version = '31.1-jre'
+project.ext.lombok_version = '1.18.36'
+project.ext.jabel_version = '1.0.1-1'
+project.ext.guava_version = '33.2.1-jre'
 project.ext.args4j_version = '2.33'
-project.ext.junit_version = '5.9.1'
-project.ext.commons_io_version = '2.13.0'
-project.ext.snakeyaml_version = '2.2'
+project.ext.junit_version = '5.11.4'
+project.ext.commons_io_version = '2.16.1'
+project.ext.snakeyaml_version = '2.3'
 project.ext.jmh_version = '1.36'
 
 allprojects {
     group = 'com.peterabeles'
-    version = '3.2.2'
+    version = '3.2.3-SNAPSHOT'
 }
 
 subprojects {
@@ -67,7 +67,7 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-api:${junit_version}")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit_version}")
 
-        annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:${jabel_version}")
+        annotationProcessor("com.pkware.jabel:jabel-javac-plugin:${jabel_version}")
         annotationProcessor "org.projectlombok:lombok:${lombok_version}"
     }
 
