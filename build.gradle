@@ -50,7 +50,7 @@ subprojects {
 
     test {
         useJUnitPlatform()
-        reports.html.enabled = false
+        reports.html.setRequired(false)
     }
 
     sourceSets {
@@ -58,8 +58,8 @@ subprojects {
     }
 
     dependencies {
-        examplesImplementation project.sourceSets.main.compileClasspath
-        examplesImplementation project.sourceSets.main.runtimeClasspath
+        examplesImplementation files(project.sourceSets.main.compileClasspath)
+        examplesImplementation files(project.sourceSets.main.runtimeClasspath)
 
         compileOnly "org.projectlombok:lombok:${lombok_version}"
         compileOnly 'org.jetbrains:annotations:20.0.0' // @Nullable
@@ -135,6 +135,6 @@ subprojects {
 
 wrapper {
     distributionType = Wrapper.DistributionType.BIN
-    gradleVersion = '7.6.4'
+    gradleVersion = '8.12.1'
 }
 
