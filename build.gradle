@@ -3,6 +3,7 @@
  */
 
 plugins {
+    id "com.peterabeles.gversion" version "1.10.3" apply false
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
 }
 
@@ -36,6 +37,8 @@ if (project.hasProperty('ossrhUsername')) {
 }
 
 allprojects {
+    apply plugin: 'com.peterabeles.gversion'
+
     group = 'com.peterabeles'
     version = '3.3.0'
 }
@@ -91,6 +94,12 @@ subprojects {
     }
 
     javadoc { configure(options) { failOnError = false } }
+
+    // Force the release build to fail if it depends on a SNAPSHOT
+    project.jar.dependsOn project.checkDependsOnSNAPSHOT
+
+    // Force publish to fail if trying to upload a stable release and git is dirty
+    project.publish.dependsOn failDirtyNotSnapshot
 
     if (['tools'].contains(name)) {
         project.jar.enabled = false
