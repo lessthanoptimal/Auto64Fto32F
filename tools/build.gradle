@@ -1,4 +1,3 @@
-project.jar.enabled = false
-project.tasks.publish.enabled = false
-project.tasks.publishMavenJavaPublicationToMavenLocal.enabled = false
-project.tasks.publishMavenJavaPublicationToMavenRepository.enabled = false
+subprojects {
+
+}

@@ -92,6 +92,11 @@ subprojects {
 
     javadoc { configure(options) { failOnError = false } }
 
+    if (['tools'].contains(name)) {
+        project.jar.enabled = false
+        project.tasks.publish.enabled = false
+    }
+
     if (!project.tasks.publish.enabled)
         return
 
