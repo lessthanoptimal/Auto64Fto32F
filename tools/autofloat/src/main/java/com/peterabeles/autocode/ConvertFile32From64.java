@@ -26,8 +26,11 @@ public class ConvertFile32From64 {
     List<Replacement> replaceStartsWith = new ArrayList<>();
     List<Replacement> replacementsAfter = new ArrayList<>();
 
-    /** If it encounters a string ignore it and don't filter anything inside */
-    @Getter @Setter
+    /**
+     * If it encounters a string ignore it and don't filter anything inside
+     */
+    @Getter
+    @Setter
     boolean ignoreStrings = true;
 
     boolean skipFilterOnLine;
@@ -40,11 +43,12 @@ public class ConvertFile32From64 {
 
     /**
      * Constructor
+     *
      * @param addDefaultReplacements If true all of the defaults replacement patterns are applied.
      */
-    public ConvertFile32From64( Language language, boolean addDefaultReplacements ) {
-        if( addDefaultReplacements ) {
-            if( language == Language.JAVA ) {
+    public ConvertFile32From64(Language language, boolean addDefaultReplacements) {
+        if (addDefaultReplacements) {
+            if (language == Language.JAVA) {
 //            replacePattern("/\\*\\*/double", "FIXED_DOUBLE");
                 replacePattern("double", "float");
                 replacePattern("Double", "Float");
@@ -54,39 +58,117 @@ public class ConvertFile32From64 {
                 replaceStartsWith("-Math.", "(float)-Math.");
 
                 replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/double");
-            } else if( language == Language.KOTLIN ) {
+            } else if (language == Language.KOTLIN) {
                 replacePattern("Double", "Float");
                 replacePattern("_F64", "_F32");
                 replacePatternAfter("FIXED_DOUBLE", "/\\*\\*/Double");
             }
         }
     }
-    public ConvertFile32From64( boolean addDefaultReplacements ) {
-        this(Language.JAVA,addDefaultReplacements);
+
+    public ConvertFile32From64(boolean addDefaultReplacements) {
+        this(Language.JAVA, addDefaultReplacements);
     }
 
-    public static String fileNameNoExtension( File f , Language language ) {
-        int langLength = language.suffix().length()+1; // +1 for '.', e.g. ".java"
-        String fileName=f.getName();
+    public static String fileNameNoExtension(File f, Language language) {
+        int langLength = language.suffix().length() + 1; // +1 for '.', e.g. ".java"
+        String fileName = f.getName();
         return fileName.substring(0, fileName.length() - langLength);
+    }
+
+    List<String> readIntoTokens() throws IOException {
+        List<String> tokens = new ArrayList<>();
+        int n;
+        StringBuilder s = new StringBuilder(1024);
+        boolean prevChar = true;
+        while ((n = in.read()) != -1) {
+            char c = (char) n;
+            if (Character.isWhitespace(c)) {
+                if (prevChar && s.length() > 0) {
+                    tokens.add(s.toString());
+                    s.delete(0, s.length());
+                }
+                s.append(c);
+
+                prevChar = false;
+            } else {
+                if (!prevChar) {
+                    tokens.add(s.toString());
+                    s.delete(0, s.length());
+                }
+                s.append(c);
+                prevChar = true;
+            }
+        }
+        tokens.add(s.toString());
+        return tokens;
+    }
+
+    /**
+     * The beginning and end of strings need to be split off tob eparsed correctly later on
+     */
+    static List<String> handleQuoteTokens(List<String> input) {
+        List<String> output = new ArrayList<>();
+
+        for (int idxInput = 0; idxInput < input.size(); idxInput++) {
+            String tokenIn = input.get(idxInput);
+
+            int idx1 = tokenIn.indexOf('"');
+            if (idx1 == -1) {
+                // there's no quote in this token
+                output.add(tokenIn);
+                continue;
+            }
+
+            int idx0 = 0;
+            if (idx1 != 0) {
+                // Find the first non-escaped quote
+                while (idx1 != -1 && tokenIn.charAt(idx1 - 1) == '\\') {
+                    idx1 = tokenIn.indexOf('"', idx1 + 1);
+                }
+
+                // They are all escaped
+                if (idx1 == -1) {
+                    output.add(tokenIn);
+                    continue;
+                }
+            } else {
+                output.add("\"");
+                idx0 = idx1 + 1;
+                idx1 = tokenIn.indexOf('"', idx0);
+            }
+
+            while (idx1 != -1) {
+                // See if it's not escaped
+                if (tokenIn.charAt(idx1 - 1) != '\\') {
+                    output.add(tokenIn.substring(idx0, idx1));
+                    output.add("\"");
+                    idx0 = idx1 + 1;
+                }
+                idx1 = tokenIn.indexOf('"', idx1 + 1);
+            }
+            if (idx0 < tokenIn.length())
+                output.add(tokenIn.substring(idx0));
+        }
+
+        return output;
     }
 
     /**
      * Applies the specified keyword replacements to the input file and saves the results to the output file
-     * @param inputFile File that is to be transformed. Unmodified.
+     *
+     * @param inputFile  File that is to be transformed. Unmodified.
      * @param outputFile Where results of the transformation are written to.  Modified
      * @throws IOException If something goes wrong this is thrown.
      */
-    public void process(File inputFile, File outputFile ) throws IOException {
+    public void process(File inputFile, File outputFile) throws IOException {
         scanForCustomization(inputFile);
 
         try {
             in = new FileInputStream(inputFile);
             out = new PrintStream(outputFile);
 
-            int n;
-            StringBuilder s = new StringBuilder(1024);
-            boolean prevChar = false;
+            List<String> tokens = handleQuoteTokens(readIntoTokens());
 
             State state = State.INITIALIZING;
             int totalTokens = 0;
@@ -97,108 +179,84 @@ public class ConvertFile32From64 {
             int lineCharacterCount = 0;
             skipFilterOnLine = false;
 
-            while ((n = in.read()) != -1) {
-                if( n == '\n' || n == '\r' ) {
-                    lineCharacterCount = 0;
-                    if (insideLineComment ) {
+            for (int idxToken = 0; idxToken < tokens.size(); idxToken++) {
+                String token = tokens.get(idxToken);
+                if (token.isBlank()) {
+                    if (token.contains("\n")) {
+                        lineCharacterCount = 0;
                         insideLineComment = false;
-                    }
-                } else {
-                    lineCharacterCount++;
-                }
-
-                if (Character.isWhitespace((char) n)) {
-                    if (prevChar) {
-                        boolean skip = false;
-                        String token = s.toString();
-                        if (insideBlockComments) {
-                            if (token.startsWith("*/"))
-                                insideBlockComments = false;
-                        }
-                        if (!(insideBlockComments || insideLineComment)) {
-                            if (token.startsWith("/*"))
-                                insideBlockComments = true;
-                            else if (token.startsWith("//"))
-                                insideLineComment = true;
-                        }
-
-                        if( insideLineComment && lineCharacterCount == token.length()+1 ) {
-                            if( token.startsWith("//NOFILTER")) {
-                                skipFilterOnLine = true;
-                                skip = true;
-                            }
-                        }
-
-                        // Don't convert Strings
-                        if (insideString) {
-                            skip = true;
-                            out.print(s);
-                            out.flush();
-
-                            // See if it might be an exit point from the string
-                            if (token.contains("\"")) {
-                                // Remove the escape characters
-                                String filtered = token.replace("\\\"","");
-                                if (filtered.contains("\"")) {
-                                    insideString = false;
-                                }
-                            }
-                        } else if (ignoreStrings && token.contains("\"")) {
-                            insideString = true;
-                            skip = true;
-                            out.print(s);
-                            out.flush();
-                        }
-
-                        if( !skip ) {
-                            switch (state) {
-                                case INITIALIZING:
-                                    if (totalTokens == 0 && token.startsWith("/*")) {
-                                        state = State.INSIDE_COPYRIGHT;
-                                    } else if (!(insideBlockComments || insideLineComment) &&
-                                            (token.compareTo("class") == 0 || token.compareTo("interface") == 0)) {
-                                        state = State.BEFORE_CLASS_NAME;
-                                    }
-                                    handleToken(token);
-                                    break;
-
-                                case INSIDE_COPYRIGHT:
-                                    if (token.compareTo("*/") == 0) {
-                                        state = State.INITIALIZING;
-                                    }
-                                    out.print(token);
-                                    break;
-
-                                case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
-                                    state = State.MAIN;
-                                    // In Java there could be Generics touching the class name E.g. class Foo<A>
-                                    // make sure we keep that extra info
-                                    String inputName = fileNameNoExtension(inputFile,language);
-                                    String outputName = fileNameNoExtension(outputFile,language);
-                                    out.print(outputName + token.substring(inputName.length()));
-                                    break;
-
-                                case MAIN:
-                                    handleToken(token);
-                                    break;
-                            }
-                        }
-                        s.delete(0, s.length());
-                        prevChar = false;
-                        totalTokens++;
-                    }
-                    out.write(n);
-                    if( n == '\n' || n == '\r' ) {
                         skipFilterOnLine = false;
                     }
-                } else {
-                    prevChar = true;
-                    s.append((char) n);
+                    lineCharacterCount += token.length();
+                    out.print(token);
+                    out.flush();
+                    continue;
                 }
-            }
 
-            if (prevChar) {
-                handleToken(s.toString());
+                boolean skip = false;
+                if (insideBlockComments) {
+                    if (token.startsWith("*/"))
+                        insideBlockComments = false;
+                }
+                if (!(insideBlockComments || insideLineComment)) {
+                    if (token.startsWith("/*"))
+                        insideBlockComments = true;
+                    else if (token.startsWith("//"))
+                        insideLineComment = true;
+                }
+
+                if (insideLineComment && lineCharacterCount == token.length() + 1) {
+                    if (token.startsWith("//NOFILTER")) {
+                        skipFilterOnLine = true;
+                        skip = true;
+                    }
+                }
+
+                if (ignoreStrings && !insideLineComment && !insideBlockComments) {
+                    if (token.equals("\"")) {
+                        insideString = !insideString;
+                    }
+                }
+                if (insideString) {
+                    skip = true;
+                }
+
+                if (!skip) {
+                    switch (state) {
+                        case INITIALIZING:
+                            if (totalTokens == 0 && token.startsWith("/*")) {
+                                state = State.INSIDE_COPYRIGHT;
+                            } else if (!(insideBlockComments || insideLineComment) &&
+                                    (token.compareTo("class") == 0 || token.compareTo("interface") == 0)) {
+                                state = State.BEFORE_CLASS_NAME;
+                            }
+                            handleToken(token);
+                            break;
+
+                        case INSIDE_COPYRIGHT:
+                            if (token.compareTo("*/") == 0) {
+                                state = State.INITIALIZING;
+                            }
+                            out.print(token);
+                            break;
+
+                        case BEFORE_CLASS_NAME: // for the class name to be the same as the output file
+                            state = State.MAIN;
+                            // In Java there could be Generics touching the class name E.g. class Foo<A>
+                            // make sure we keep that extra info
+                            String inputName = fileNameNoExtension(inputFile, language);
+                            String outputName = fileNameNoExtension(outputFile, language);
+                            out.print(outputName + token.substring(inputName.length()));
+                            break;
+
+                        case MAIN:
+                            handleToken(token);
+                            break;
+                    }
+                } else {
+                    out.print(token);
+                }
+                totalTokens++;
             }
         } finally {
             out.close();
@@ -210,26 +268,38 @@ public class ConvertFile32From64 {
 
         // See if it needs to do some additional modifications
         // TODO speed up by never saving to disk the first time
-        if( language == Language.JAVA && markAsAutoGenerated ) {
-            in = new AugmentJavaFiles().augment(new FileInputStream(outputFile),fileNameNoExtension(inputFile,language));
+        if (language == Language.JAVA && markAsAutoGenerated) {
+            in = new AugmentJavaFiles().augment(new FileInputStream(outputFile), fileNameNoExtension(inputFile, language));
             OutputStream out = new FileOutputStream(outputFile);
             copy(in, out);
             out.close();
         }
     }
 
-    public void scanForCustomization( File inputFile ) throws IOException {
+    private static int filterAndCountQuotes(String token) {
+        // See if the string is a single token
+        String filtered = token.replace("\\\"", "");
+        // see if the entire string is in this token
+        int count = 0;
+        for (int i = 0; i < filtered.length(); i++) {
+            if (filtered.charAt(i) == '"')
+                count++;
+        }
+        return count;
+    }
+
+    public void scanForCustomization(File inputFile) throws IOException {
         customIgnore.clear();
 
         BufferedReader in = new BufferedReader(new FileReader(inputFile));
 
         String line;
-        while( (line = in.readLine()) != null ) {
-            if( !line.startsWith("//CUSTOM"))
+        while ((line = in.readLine()) != null) {
+            if (!line.startsWith("//CUSTOM"))
                 continue;
 
             String[] words = line.substring(9).split(" ");
-            if( words[0].equals("ignore")) {
+            if (words[0].equals("ignore")) {
                 customIgnore.add(words[1]);
             }
         }
@@ -240,7 +310,7 @@ public class ConvertFile32From64 {
     /**
      * Adds a text replacement rule.  These will be run in the first pass
      *
-     * @param pattern REGEX pattern that is searched for inside the word
+     * @param pattern     REGEX pattern that is searched for inside the word
      * @param replacement The string that the matching portion will be replaced with
      */
     public void replacePattern(String pattern, String replacement) {
@@ -251,7 +321,7 @@ public class ConvertFile32From64 {
      * If a world starts with the pattern (just a string not a REGEX) then the matching text will be replaced
      * by the replacement string.
      *
-     * @param pattern Regular text string
+     * @param pattern     Regular text string
      * @param replacement The string that the matching portion will be replaced with
      */
     public void replaceStartsWith(String pattern, String replacement) {
@@ -261,7 +331,7 @@ public class ConvertFile32From64 {
     /**
      * Adds a text replacement rule.  These will be run in the final pass
      *
-     * @param pattern REGEX pattern that is searched for inside the word
+     * @param pattern     REGEX pattern that is searched for inside the word
      * @param replacement The string that the matching portion will be replaced with
      */
     public void replacePatternAfter(String pattern, String replacement) {
@@ -272,13 +342,13 @@ public class ConvertFile32From64 {
         boolean ignore = false;
 
         for (int i = 0; i < customIgnore.size(); i++) {
-            if( s.contains(customIgnore.get(i))) {
+            if (s.contains(customIgnore.get(i))) {
                 ignore = true;
                 break;
             }
         }
 
-        if( !ignore && !skipFilterOnLine && !s.contains("/**/") ) {
+        if (!ignore && !skipFilterOnLine && !s.contains("/**/")) {
             for (int i = 0; i < replacements.size(); i++) {
                 Replacement r = replacements.get(i);
                 s = s.replaceAll(r.pattern, r.replacement);

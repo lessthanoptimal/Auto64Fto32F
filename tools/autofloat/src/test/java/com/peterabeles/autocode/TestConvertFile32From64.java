@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,18 +21,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class TestConvertFile32From64 {
 
+    @Test
+    void handleQuoteTokens() {
+        var input = new ArrayList<String>();
+        input.add("asdf");
+        input.add(" ");
+        input.add("asdf\"");
+        input.add("asdf\"roodf\\\"sdf\"");
+        input.add("\"roodf\"");
+        input.add("sdf\"");
+        input.add("\"");
+
+        var found = ConvertFile32From64.handleQuoteTokens(input);
+
+        var expected = new String[]{"asdf", " ", "asdf", "\"", "asdf", "\"", "roodf\\\"sdf", "\"", "\"", "roodf", "\"", "sdf", "\"", "\""};
+
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], found.get(i));
+        }
+        assertEquals(expected.length, found.size());
+    }
+
     /**
      * Adds a custom ignore toa file and sees if it is handled correctly
      */
-    @Test void customIgnore() throws IOException {
+    @Test
+    void customIgnore() throws IOException {
         String input = """
                 package dummy;
-
+                
                 import foo.bar.Stuff_F64;
                 import foo.bar.Moo_F64;
-
+                
                 //CUSTOM ignore Stuff_F64
-
+                
                 public class DummyCode_F64 {
                 \tStuff_F64 foo;
                 \tMoo_F64 boo;
@@ -40,12 +63,12 @@ public class TestConvertFile32From64 {
 
         String expected = """
                 package dummy;
-
+                
                 import foo.bar.Stuff_F64;
                 import foo.bar.Moo_F32;
-
+                
                 //CUSTOM ignore Stuff_F64
-
+                
                 public class DummyCode_F32 {
                 \tStuff_F64 foo;
                 \tMoo_F32 boo;
@@ -73,22 +96,35 @@ public class TestConvertFile32From64 {
         }
     }
 
-    @Test void stringsAreIgnored() throws IOException {
+    @Test
+    void stringsAreIgnored() throws IOException {
         String input = """
+                /** " do nothing here */
+                // " this should be ignored "
                 public class DummyCode_F64 {
                 \tString foo = "Let's ignore Stuff_F64 1.2345 df";
                 \tString moo = "escape\\"Stuff_F64 1.2.34 ";
-                \t
+                \tString moo = "singletokenstring";
+                \t("Row and/or column out of range. "+row+" "+col);
+                \tCode_F64+"word "+1.234;
+                \tCode_F64+"wo\\"rd"+1.234;
+                \tdouble lala = 1.2345;
                 }
                 """;
 
         String expected = """
+                /** " do nothing here */
+                // " this should be ignored "
                 public class DummyCode_F32 {
                 \tString foo = "Let's ignore Stuff_F64 1.2345 df";
                 \tString moo = "escape\\"Stuff_F64 1.2.34 ";
+                \tString moo = "singletokenstring";
+                \t("Row and/or column out of range. "+row+" "+col);
+                \tCode_F32+"word "+1.234f;
+                \tCode_F32+"wo\\"rd"+1.234f;
+                \tfloat lala = 1.2345f;
                 }
                 """;
-
 
         File fileInput = new File("DummyCode_F64.java");
         File fileExpected = new File("DummyCode_F32.java");
