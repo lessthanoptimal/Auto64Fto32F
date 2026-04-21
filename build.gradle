@@ -2,6 +2,10 @@
  * Auto64to32F is released to Public Domain or MIT License. Either maybe used.
  */
 
+plugins {
+    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
+}
+
 ext.libpath = file('./').absolutePath
 
 project.ext.lombok_version = '1.18.36'
@@ -12,6 +16,24 @@ project.ext.junit_version = '5.11.4'
 project.ext.commons_io_version = '2.16.1'
 project.ext.snakeyaml_version = '2.3'
 project.ext.jmh_version = '1.36'
+
+// if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
+if (project.hasProperty('ossrhUsername')) {
+    nexusPublishing {
+        repositories {
+            sonatype {
+                nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+                snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+} else {
+    ext.ossrhUsername = "dummy"
+    ext.ossrhPassword = "dummy"
+}
 
 allprojects {
     group = 'com.peterabeles'
@@ -41,7 +63,7 @@ subprojects {
         mavenCentral()
         mavenLocal()
 
-        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url = "https://central.sonatype.com/repository/maven-snapshots/" }
         maven { url = 'https://jitpack.io' } // Allows annotations past Java 8 to be used
     }
 
@@ -72,12 +94,6 @@ subprojects {
 
     if (!project.tasks.publish.enabled)
         return
-
-    // if Maven central isn't setup in ~/.gradle/gradle.properties fill in these variables to make it happy
-    if (!project.hasProperty('ossrhUsername')) {
-        ext.ossrhUsername = "dummy"
-        ext.ossrhPassword = "dummy"
-    }
 
     publishing {
         publications {
@@ -114,7 +130,7 @@ subprojects {
         }
         repositories {
             maven {
-                def releasesRepoUrl = "https://central.sonatype.com/api/v1/publish/"
+                def releasesRepoUrl = "https://ossrh-staging-api.central.sonatype.com/service/local/"
                 def snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                 credentials {
