@@ -73,6 +73,41 @@ public class TestConvertFile32From64 {
         }
     }
 
+    @Test void stringsAreIgnored() throws IOException {
+        String input = """
+                public class DummyCode_F64 {
+                \tString foo = "Let's ignore Stuff_F64 1.2345 df";
+                \tString moo = "escape\\"Stuff_F64 1.2.34 ";
+                \t
+                }
+                """;
+
+        String expected = """
+                public class DummyCode_F32 {
+                \tString foo = "Let's ignore Stuff_F64 1.2345 df";
+                \tString moo = "escape\\"Stuff_F64 1.2.34 ";
+                }
+                """;
+
+
+        File fileInput = new File("DummyCode_F64.java");
+        File fileExpected = new File("DummyCode_F32.java");
+
+        try {
+            var alg = new ConvertFile32From64(true);
+
+            FileUtils.write(fileInput, input, Charset.defaultCharset());
+
+            alg.process(fileInput, fileExpected);
+            String found = FileUtils.readFileToString(fileExpected, StandardCharsets.UTF_8);
+
+            assertEquals(expected, found);
+        } finally {
+            fileInput.delete();
+            fileExpected.delete();
+        }
+    }
+
     File createFile(String text) {
         try {
             File file = File.createTempFile("auto", "txt");

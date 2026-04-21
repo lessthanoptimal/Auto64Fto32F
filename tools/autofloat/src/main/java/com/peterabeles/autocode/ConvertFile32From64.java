@@ -4,6 +4,9 @@
 
 package com.peterabeles.autocode;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +17,6 @@ import java.util.List;
  * @author Peter Abeles
  */
 public class ConvertFile32From64 {
-
     InputStream in;
     PrintStream out;
 
@@ -23,6 +25,10 @@ public class ConvertFile32From64 {
     List<Replacement> replacements = new ArrayList<>();
     List<Replacement> replaceStartsWith = new ArrayList<>();
     List<Replacement> replacementsAfter = new ArrayList<>();
+
+    /** If it encounters a string ignore it and don't filter anything inside */
+    @Getter @Setter
+    boolean ignoreStrings = true;
 
     boolean skipFilterOnLine;
     /**
@@ -86,6 +92,7 @@ public class ConvertFile32From64 {
             int totalTokens = 0;
             boolean insideBlockComments = false;
             boolean insideLineComment = false;
+            boolean insideString = false;
 
             int lineCharacterCount = 0;
             skipFilterOnLine = false;
@@ -121,6 +128,28 @@ public class ConvertFile32From64 {
                                 skip = true;
                             }
                         }
+
+                        // Don't convert Strings
+                        if (insideString) {
+                            skip = true;
+                            out.print(s);
+                            out.flush();
+
+                            // See if it might be an exit point from the string
+                            if (token.contains("\"")) {
+                                // Remove the escape characters
+                                String filtered = token.replace("\\\"","");
+                                if (filtered.contains("\"")) {
+                                    insideString = false;
+                                }
+                            }
+                        } else if (ignoreStrings && token.contains("\"")) {
+                            insideString = true;
+                            skip = true;
+                            out.print(s);
+                            out.flush();
+                        }
+
                         if( !skip ) {
                             switch (state) {
                                 case INITIALIZING:
